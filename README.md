@@ -1,3 +1,15 @@
+## API to Document
+
+### RouteProvider.registerType
+### RouteProvider.registerUrlToken
+### RouteProvider.registerUrl
+### ViewBindingsProvider.bind
+### $rootScope events
+#### beforeStateChange
+#### ?
+### UrlWriters
+### RouteHref
+
 ### Low-level Process - How does this work?
 1. Angular loads in config mode
 2. Application registers url tokens, urls, url writers and view bindings
