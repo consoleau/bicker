@@ -12,7 +12,7 @@ module.exports = function (config) {
     ],
 
     preprocessors: {
-      '../../scripts/**/*.coffee': ['coffee'],
+      '../../src/**/*.coffee': ['coffee'],
       '**/*.coffee': ['coffee']
     },
 
@@ -39,9 +39,9 @@ module.exports = function (config) {
       '../../bower_components/jquery/dist/jquery.min.js',
       '../../bower_components/angular/angular.min.js',
       '../../bower_components/angular-mocks/angular-mocks.js',
-      '../../bower_components/lodash/lodash.min.js',
-      '../../scripts/router.coffee',
-      '../../scripts/**/*.coffee',
+      '../../bower_components/lodash/lodash.js',
+      '../../src/router.coffee',
+      '../../src/**/*.coffee',
       '**/*.coffee'
     ],
 

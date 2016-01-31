@@ -77,8 +77,6 @@ describe 'View directive', ->
 
     inject ($rootScope, $httpBackend, State) ->
       element = createView 'viewA'
-      triggerOpeningAnimationCompleteCallbacks()
-      $rootScope.$digest() # resolve the empty resolving template promise
       $httpBackend.verifyNoOutstandingRequest()
 
       expect(controller).not.toHaveBeenCalled()
@@ -586,4 +584,6 @@ describe 'View directive', ->
 
   # The code waits for the animations to run, so we need to trigger the callbacks to pretend that they have run
   triggerOpeningAnimationCompleteCallbacks = ->
-    inject ($animate) -> $animate.triggerCallbacks()
+    inject ($animate, $rootScope) ->
+      $rootScope.$digest()
+      $animate.flush()
