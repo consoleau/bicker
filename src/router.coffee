@@ -1,4 +1,4 @@
-angular.module('bicker_router', []).run (State, Route, $location, $rootScope, ObjectHelper, PendingViewCounter) ->
+angular.module('bicker_router', ['ngAnimate']).run (State, Route, $location, $rootScope, ObjectHelper, PendingViewCounter) ->
   oldUrl = undefined
   $rootScope.$on '$locationChangeStart', ->
     Route.setReady false if Route.isReady()

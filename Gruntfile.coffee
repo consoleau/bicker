@@ -4,6 +4,8 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-coffee'
   grunt.loadNpmTasks 'grunt-contrib-clean'
   grunt.loadNpmTasks 'grunt-karma'
+  grunt.loadNpmTasks 'grunt-express-server'
+  grunt.loadNpmTasks 'grunt-contrib-copy'
 
   grunt.initConfig
     coffee:
@@ -35,9 +37,35 @@ module.exports = (grunt) ->
 
     clean:
       dist: ['build', 'dist']
+      example: ['example/lib']
 
-  grunt.registerTask 'dist', ['clean', 'coffee:dist', 'concat:dist', 'uglify:dist']
+    express:
+      example:
+        options:
+          script: 'examples/server.js'
+
+    copy:
+      example:
+        files: [
+            src: 'bower_components/angular/angular.js'
+            dest: 'examples/lib/angular.js'
+          ,
+            src: 'bower_components/angular-animate/angular-animate.js'
+            dest: 'examples/lib/angular-animate.js'
+          ,
+            src: 'bower_components/lodash/lodash.js'
+            dest: 'examples/lib/lodash.js'
+          ,
+            src: 'bower_components/jquery/dist/jquery.js'
+            dest: 'examples/lib/jquery.js'
+          ,
+            src: 'dist/bicker.js'
+            dest: 'examples/lib/bicker.js'
+        ]
+
+  grunt.registerTask 'dist', ['clean:dist', 'coffee:dist', 'concat:dist', 'uglify:dist']
   grunt.registerTask 'default', ['dist']
   grunt.registerTask 'test', ['karma']
+  grunt.registerTask 'example', ['clean:example','copy:example','express:example']
 
 

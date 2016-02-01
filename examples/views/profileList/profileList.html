@@ -1,0 +1,6 @@
+<section class="user-list">
+    <div ng-repeat="user in users">
+        <span>{{user.id}}</span>
+        <span><a route-href="profileUrlWriter(user)">{{user.name}}</a></span>
+    </div>
+</section>
