@@ -24,6 +24,7 @@
     "lodash": "4.0.1"
   },
   "scripts": {
-    "test": "./node_modules/karma/bin/karma start test/karma/karma.conf.js"
+    "test": "./node_modules/karma/bin/karma start test/karma/karma.conf.js",
+    "get_deps": "bower install && npm install"
   }
 }

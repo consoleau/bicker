@@ -19,10 +19,7 @@ angular.module('bicker_example', ['bicker_router']).config(function (RouteProvid
                     var deferred = $q.defer();
 
                     $timeout(function() {
-                        deferred.resolve({
-                            name: 'John Doe',
-                            id: State.get('profile.id')
-                        })
+                        deferred.resolve(getUser(State.get('profile.id')))
                     }, 2000);
 
                     return deferred.promise;
@@ -33,13 +30,7 @@ angular.module('bicker_example', ['bicker_router']).config(function (RouteProvid
             templateUrl: 'views/profileList/profileList.html',
             resolve: {
                 UserList: function () {
-                    return [{
-                        id: 1234,
-                        name: 'John Doe'
-                    },{
-                        id: 2345,
-                        name: 'Jane Doe'
-                    }]
+                    return users;
                 }
             }
         }
@@ -51,3 +42,22 @@ angular.module('bicker_example', ['bicker_router']).config(function (RouteProvid
 }).run(function ($animate) {
     $animate.enabled(true);
 });
+
+function getUser(id) {
+    for (user in users) {
+        if (users[user].id === id) {
+            return users[user];
+        }
+    }
+
+    return null;
+}
+
+
+const users = [{
+    id: 1234,
+    name: 'John Doe'
+},{
+    id: 2345,
+    name: 'Jane Doe'
+}];

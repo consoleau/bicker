@@ -91,6 +91,8 @@ angular.module('bicker_router').directive 'view', ($compile, $controller, ViewBi
         timeStartedMainView = Date.now()
 
         onSuccessfulResolution = (args) ->
+#          return if getMatchingBinding(bindings) isnt binding
+
           viewCreated = true
 
           resolvingTemplateShownTime = Date.now() - timeStartedMainView
