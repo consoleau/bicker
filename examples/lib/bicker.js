@@ -281,6 +281,9 @@
           timeStartedMainView = Date.now();
           onSuccessfulResolution = function(args) {
             var injectMainTemplate, mainTemplateInjectionDelay, resolvingTemplateShownTime;
+            if (getMatchingBinding(bindings) !== binding) {
+              return;
+            }
             viewCreated = true;
             resolvingTemplateShownTime = Date.now() - timeStartedMainView;
             injectMainTemplate = function() {

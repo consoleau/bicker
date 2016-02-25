@@ -774,7 +774,7 @@
             ref = match.url.state;
             for (key in ref) {
               value = ref[key];
-              ObjectHelper.set(data, key, value);
+              ObjectHelper.set(data, key, (typeof value === 'object' ? _.cloneDeep(value) : value));
             }
             return data;
           },

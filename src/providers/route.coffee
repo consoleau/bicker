@@ -116,7 +116,7 @@ angular.module('bicker_router').provider 'Route', (ObjectHelper) ->
           data = {}
 
           for key, value of match.url.state
-            ObjectHelper.set data, key, value
+            ObjectHelper.set data, key, (if typeof value is 'object' then _.cloneDeep(value) else value)
 
           data
 
