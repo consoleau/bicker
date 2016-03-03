@@ -131,7 +131,7 @@ describe 'View directive', ->
     window.angular.mock.module (RouteProvider, ViewBindingsProvider, $controllerProvider) ->
       RouteProvider.registerUrl '/fake_initial_url'
       $controllerProvider.register 'StateVariationActrl', ['$scope', controller]
-
+      RouteProvider.setPersistentStates 'stateField'
       ViewBindingsProvider.bind 'viewA', {
         controller: 'StateVariationActrl'
         templateUrl: 'stateVariationA.html'
@@ -179,7 +179,7 @@ describe 'View directive', ->
       RouteProvider.registerUrl '/fake_initial_url'
       $controllerProvider.register 'StateVariationActrl', ['$scope', stateAController]
       $controllerProvider.register 'StateVariationBctrl', ['$scope', stateBController]
-
+      RouteProvider.setPersistentStates 'stateFieldA'
       ViewBindingsProvider.bind 'viewA', [viewAstateVariationA, viewAstateVariationB]
 
       return
@@ -231,7 +231,7 @@ describe 'View directive', ->
     window.angular.mock.module (RouteProvider, ViewBindingsProvider, $controllerProvider) ->
       RouteProvider.registerUrl '/fake_initial_url'
       $controllerProvider.register 'StateVariationActrl', ['$scope', stateAController]
-
+      RouteProvider.setPersistentStates 'stateFieldA'
       ViewBindingsProvider.bind 'viewA', [viewAstateVariationA, viewAstateVariationB]
 
       return
@@ -239,7 +239,7 @@ describe 'View directive', ->
     mockTemplateRequest 'stateVariationA.html', '<div id="contentsA"></div>'
     mockLocationSuccess()
 
-    inject (State) ->
+    inject (State, $rootScope) ->
       State.set 'stateFieldA', 'some value'
 
       createView 'viewA'
