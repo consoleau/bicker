@@ -23,8 +23,8 @@ angular.module('bicker_router').directive 'view', ($compile, $controller, ViewBi
         _.cloneDeep State.getSubset getStateFieldsFromBinding binding
 
       getComponentFromBinding = (binding) ->
-        return _.pick(binding, ['controller', 'templateUrl']) unless binding.component
-        _.pick($injector.get(binding.component + 'Directive')[0],['controller', 'templateUrl'])
+        source = if binding.component then $injector.get(binding.component + 'Directive')[0] else binding
+        _.defaults(_.pick(source, ['controller', 'templateUrl', 'controllerAs']), { controllerAs: '$ctrl' })
 
       hasRequiredData = (binding) ->
         return true if not binding.requiredState?
@@ -114,8 +114,7 @@ angular.module('bicker_router').directive 'view', ($compile, $controller, ViewBi
               locals = _.merge dependencies, $scope: viewScope
 
               controller = $controller(component.controller, locals)
-              element.data('$ngControllerController', controller)
-              element.children().data('$ngControllerController', controller)
+              locals.$scope[component.controllerAs] = controller
 
             link viewScope
 

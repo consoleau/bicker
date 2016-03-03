@@ -196,10 +196,11 @@
           return _.cloneDeep(State.getSubset(getStateFieldsFromBinding(binding)));
         };
         getComponentFromBinding = function(binding) {
-          if (!binding.component) {
-            return _.pick(binding, ['controller', 'templateUrl']);
-          }
-          return _.pick($injector.get(binding.component + 'Directive')[0], ['controller', 'templateUrl']);
+          var source;
+          source = binding.component ? $injector.get(binding.component + 'Directive')[0] : binding;
+          return _.defaults(_.pick(source, ['controller', 'templateUrl', 'controllerAs']), {
+            controllerAs: '$ctrl'
+          });
         };
         hasRequiredData = function(binding) {
           var element, i, len, negateResult, ref, requirement;
@@ -305,8 +306,7 @@
                   $scope: viewScope
                 });
                 controller = $controller(component.controller, locals);
-                element.data('$ngControllerController', controller);
-                element.children().data('$ngControllerController', controller);
+                locals.$scope[component.controllerAs] = controller;
               }
               link(viewScope);
               return $timeout(function() {

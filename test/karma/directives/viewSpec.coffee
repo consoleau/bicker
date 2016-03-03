@@ -75,6 +75,44 @@ describe 'View directive', ->
 
     expect(controller).toHaveBeenCalled()
 
+  it 'should assign the controller to scope.$ctrl', ->
+    controller = ->
+      this.testing = 1234
+
+    window.angular.mock.module (RouteProvider, ViewBindingsProvider, $compileProvider) ->
+      $compileProvider.component('myComponent', controller: controller, templateUrl: 'stateVariationA.html')
+      ViewBindingsProvider.bind 'viewA', component: 'myComponent'
+
+      return
+
+    mockLocationSuccess()
+    mockTemplateRequest 'stateVariationA.html', '<div>{{$ctrl.testing}}</div>'
+
+    element = createView 'viewA'
+    triggerOpeningAnimationCompleteCallbacks()
+    deliverMainTemplate()
+
+    expect(element.text()).toEqual('1234')
+
+  it 'should allow users to specify the name of the property on scope where the controller will be found via controllerAs', ->
+    controller = ->
+      this.testing = 1234
+
+    window.angular.mock.module (RouteProvider, ViewBindingsProvider, $compileProvider) ->
+      $compileProvider.component('myComponent', controller: controller, controllerAs: 'boop', templateUrl: 'stateVariationA.html')
+      ViewBindingsProvider.bind 'viewA', component: 'myComponent'
+
+      return
+
+    mockLocationSuccess()
+    mockTemplateRequest 'stateVariationA.html', '<div>{{boop.testing}}</div>'
+
+    element = createView 'viewA'
+    triggerOpeningAnimationCompleteCallbacks()
+    deliverMainTemplate()
+
+    expect(element.text()).toEqual('1234')
+
   it 'only binds a view if the required state data matches up to the state of the current page', ->
     controller = jasmine.createSpy()
 
