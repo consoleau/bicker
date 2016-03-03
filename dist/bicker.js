@@ -183,7 +183,7 @@
       replace: true,
       template: '<div></div>',
       link: function(viewDirectiveScope, iElement, iAttrs) {
-        var bindings, createView, destroyView, fields, getFieldsToWatch, getMatchingBinding, getStateDataForBinding, getStateFieldsFromBinding, getStateFieldsFromView, hasRequiredData, manageView, previousBinding, previousBoundState, resolve, showResolvingErrorTemplate, showResolvingTemplate, stripNegationPrefix, view, viewCreated, viewManagementPending, viewScope;
+        var bindings, createView, destroyView, fields, getComponentFromBinding, getFieldsToWatch, getMatchingBinding, getStateDataForBinding, getStateFieldsFromBinding, getStateFieldsFromView, hasRequiredData, manageView, previousBinding, previousBoundState, resolve, showResolvingErrorTemplate, showResolvingTemplate, stripNegationPrefix, view, viewCreated, viewManagementPending, viewScope;
         viewCreated = false;
         viewScope = void 0;
         viewManagementPending = false;
@@ -194,6 +194,12 @@
         previousBinding = void 0;
         getStateDataForBinding = function(binding) {
           return _.cloneDeep(State.getSubset(getStateFieldsFromBinding(binding)));
+        };
+        getComponentFromBinding = function(binding) {
+          if (!binding.component) {
+            return _.pick(binding, ['controller', 'templateUrl']);
+          }
+          return _.pick($injector.get(binding.component + 'Directive')[0], ['controller', 'templateUrl']);
         };
         hasRequiredData = function(binding) {
           var element, i, len, negateResult, ref, requirement;
@@ -277,8 +283,9 @@
           return viewScope.$destroy();
         };
         createView = function(element, binding, minimumDelay) {
-          var onResolutionFailure, onSuccessfulResolution, promises, timeStartedMainView;
+          var component, onResolutionFailure, onSuccessfulResolution, promises, timeStartedMainView;
           timeStartedMainView = Date.now();
+          component = getComponentFromBinding(binding);
           onSuccessfulResolution = function(args) {
             var injectMainTemplate, mainTemplateInjectionDelay, resolvingTemplateShownTime;
             if (getMatchingBinding(bindings) !== binding) {
@@ -293,11 +300,11 @@
               element.html(template);
               link = $compile(element.contents());
               viewScope = viewDirectiveScope.$new();
-              if (binding.controller) {
+              if (component.controller) {
                 locals = _.merge(dependencies, {
                   $scope: viewScope
                 });
-                controller = $controller(binding.controller, locals);
+                controller = $controller(component.controller, locals);
                 element.data('$ngControllerController', controller);
                 element.children().data('$ngControllerController', controller);
               }
@@ -326,7 +333,7 @@
             return showResolvingErrorTemplate(element, binding);
           };
           promises = {
-            template: $templateRequest(binding.templateUrl),
+            template: $templateRequest(component.templateUrl),
             dependencies: resolve(binding)
           };
           return $q.all(promises).then(onSuccessfulResolution, onResolutionFailure);

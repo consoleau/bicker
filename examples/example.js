@@ -26,9 +26,8 @@ angular.module('bicker_example', ['bicker_router']).config(function (RouteProvid
                 }]
             }
         },{
-            controller: 'ProfileListController',
+            component: 'profileListComponent',
             resolvingTemplateUrl: 'views/loading/loading.html',
-            templateUrl: 'views/profileList/profileList.html',
             resolve: {
                 UserList: function () {
                     return users;

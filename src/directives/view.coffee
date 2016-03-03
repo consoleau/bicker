@@ -22,6 +22,10 @@ angular.module('bicker_router').directive 'view', ($compile, $controller, ViewBi
       getStateDataForBinding = (binding) ->
         _.cloneDeep State.getSubset getStateFieldsFromBinding binding
 
+      getComponentFromBinding = (binding) ->
+        return _.pick(binding, ['controller', 'templateUrl']) unless binding.component
+        _.pick($injector.get(binding.component + 'Directive')[0],['controller', 'templateUrl'])
+
       hasRequiredData = (binding) ->
         return true if not binding.requiredState?
 
@@ -89,6 +93,7 @@ angular.module('bicker_router').directive 'view', ($compile, $controller, ViewBi
       createView = (element, binding, minimumDelay) ->
 
         timeStartedMainView = Date.now()
+        component = getComponentFromBinding binding
 
         onSuccessfulResolution = (args) ->
           return if getMatchingBinding(bindings) isnt binding
@@ -105,10 +110,10 @@ angular.module('bicker_router').directive 'view', ($compile, $controller, ViewBi
             link = $compile element.contents()
             viewScope = viewDirectiveScope.$new()
 
-            if binding.controller
+            if component.controller
               locals = _.merge dependencies, $scope: viewScope
 
-              controller = $controller(binding.controller, locals)
+              controller = $controller(component.controller, locals)
               element.data('$ngControllerController', controller)
               element.children().data('$ngControllerController', controller)
 
@@ -131,7 +136,7 @@ angular.module('bicker_router').directive 'view', ($compile, $controller, ViewBi
           $timeout -> PendingViewCounter.decrease() if not binding.manualCompletion
           showResolvingErrorTemplate element, binding
 
-        promises = template: $templateRequest(binding.templateUrl), dependencies: resolve(binding)
+        promises = template: $templateRequest(component.templateUrl), dependencies: resolve(binding)
         $q.all(promises).then(onSuccessfulResolution, onResolutionFailure)
 
       showResolvingTemplate = (element, binding) ->

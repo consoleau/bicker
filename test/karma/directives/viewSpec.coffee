@@ -57,6 +57,24 @@ describe 'View directive', ->
 
     expect(controller).toHaveBeenCalled()
 
+  it 'can use a component in place of the controller and templateUrl', ->
+    controller = jasmine.createSpy()
+
+    window.angular.mock.module (RouteProvider, ViewBindingsProvider, $compileProvider) ->
+      $compileProvider.component('myComponent', controller: controller, templateUrl: 'stateVariationA.html')
+      ViewBindingsProvider.bind 'viewA', component: 'myComponent'
+
+      return
+
+    mockLocationSuccess()
+    mockTemplateRequest 'stateVariationA.html', 'state variation A template'
+
+    createView 'viewA'
+    triggerOpeningAnimationCompleteCallbacks()
+    deliverMainTemplate()
+
+    expect(controller).toHaveBeenCalled()
+
   it 'only binds a view if the required state data matches up to the state of the current page', ->
     controller = jasmine.createSpy()
 
