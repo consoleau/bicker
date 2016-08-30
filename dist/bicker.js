@@ -21,7 +21,7 @@
         data = Route.extractData(match);
       }
       fieldsToUnset = ObjectHelper.notIn(State.list, data);
-      fieldsToUnset = _.difference(fieldsToUnset, Route.getPersistentStates());
+      fieldsToUnset = _.difference(fieldsToUnset, Route.getPersistentStates().concat(Route.getFlashStates()));
       eventData = {
         unsetting: fieldsToUnset,
         setting: data
@@ -35,6 +35,7 @@
         value = ref[key];
         State.set(key, value);
       }
+      Route.resetFlashStates();
       Route.setReady(true);
     });
   });
@@ -710,7 +711,7 @@
         return results;
       },
       $get: function($location, State, $injector, $q) {
-        var service;
+        var flashStates, service;
         _.forIn(urlWriters, function(writer, writerName) {
           return urlWriters[writerName] = function(data) {
             var locals;
@@ -723,6 +724,7 @@
             return $injector.invoke(writer, {}, locals);
           };
         });
+        flashStates = [];
         service = {
           readyDeferred: $q.defer(),
           match: function(urlToMatch) {
@@ -824,6 +826,17 @@
           },
           getPersistentStates: function() {
             return persistentStates;
+          },
+          resetFlashStates: function() {
+            return flashStates = [];
+          },
+          addFlashStates: function() {
+            var newStates;
+            newStates = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+            return flashStates = flashStates.concat(newStates);
+          },
+          getFlashStates: function() {
+            return flashStates;
           },
           setReady: function(ready) {
             if (!ready) {

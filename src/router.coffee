@@ -18,7 +18,7 @@ angular.module('bicker_router', ['ngAnimate']).run (State, Route, $location, $ro
       data = Route.extractData(match)
 
     fieldsToUnset = ObjectHelper.notIn State.list, data
-    fieldsToUnset = _.difference fieldsToUnset, Route.getPersistentStates()
+    fieldsToUnset = _.difference fieldsToUnset, Route.getPersistentStates().concat(Route.getFlashStates())
 
     eventData = unsetting: fieldsToUnset, setting: data
 
@@ -30,6 +30,7 @@ angular.module('bicker_router', ['ngAnimate']).run (State, Route, $location, $ro
     for key, value of eventData.setting
       State.set key, value
 
+    Route.resetFlashStates()
     Route.setReady true
 
     return

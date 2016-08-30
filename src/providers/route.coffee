@@ -77,6 +77,8 @@ angular.module('bicker_router').provider 'Route', (ObjectHelper) ->
           locals = UrlData: data
           $injector.invoke writer, {}, locals
 
+      flashStates = []
+
       service =
         readyDeferred: $q.defer()
 
@@ -147,6 +149,15 @@ angular.module('bicker_router').provider 'Route', (ObjectHelper) ->
 
         getPersistentStates: () ->
           persistentStates
+
+        resetFlashStates: ->
+          flashStates = [];
+
+        addFlashStates: (newStates...) ->
+          flashStates = flashStates.concat(newStates)
+
+        getFlashStates: () ->
+          flashStates
 
         setReady: (ready) ->
           if not ready
