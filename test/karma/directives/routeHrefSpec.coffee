@@ -15,11 +15,27 @@ describe 'routeHref directive', ->
       element = $compile('<a route-href="paginationUrlWriter()">Link</a>') $rootScope.$new()
       $rootScope.$digest()
 
-      expect(element.attr 'href').toBe '/page/2'
+      expect(element.attr 'href').toBe '#/page/2'
 
       State.set 'page', 3
       $rootScope.$digest()
-      expect(element.attr 'href').toBe '/page/3'
+      expect(element.attr 'href').toBe '#/page/3'
+
+  it 'should omit the # prefix when in html 5 mode', ->
+    window.angular.mock.module (RouteProvider) ->
+      RouteProvider.setPersistentStates 'page'
+      RouteProvider.setHtml5Mode true
+      RouteProvider.registerUrlWriter 'pagination', (UrlData, State) ->
+        page = State.get 'page'
+        "/page/#{page}"
+      return
+
+    inject ($rootScope, $location, Route, $compile, State) ->
+      State.set 'page', 2
+      element = $compile('<a route-href="paginationUrlWriter()">Link</a>') $rootScope.$new()
+      $rootScope.$digest()
+
+      expect(element.attr 'href').toBe '/page/2'
 
   it 'should prevent the default action by default and navigate using $location so as to use pushstate', ->
     window.angular.mock.module (RouteProvider) ->
@@ -34,7 +50,7 @@ describe 'routeHref directive', ->
       scope = $rootScope.$new()
       element = $compile('<a route-href="paginationUrlWriter()">Link</a>') scope
       $rootScope.$digest()
-      expect(element.attr 'href').toBe '/page/2'
+      expect(element.attr 'href').toBe '#/page/2'
 
       spyOn $location, 'url'
 
@@ -51,6 +67,7 @@ describe 'routeHref directive', ->
   it 'should ignore the route href when the ignore-href attribute is added to the anchor element', ->
     window.angular.mock.module (RouteProvider) ->
       RouteProvider.registerUrlWriter 'hash', -> '#test'
+      RouteProvider.setHtml5Mode true
       return
 
     inject ($rootScope, $compile, $location, $timeout) ->

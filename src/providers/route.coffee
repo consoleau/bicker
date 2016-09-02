@@ -5,6 +5,7 @@ angular.module('bicker_router').provider 'Route', (ObjectHelper) ->
   persistentStates = []
   ready = false
   types = {}
+  html5Mode = false
 
   provider =
 
@@ -28,6 +29,12 @@ angular.module('bicker_router').provider 'Route', (ObjectHelper) ->
 
       urls.unshift(_.extend(urlData, config))
       _.extend { and: @registerUrl }, @
+
+    setPersistentStates: (stateList...) ->
+      for state in stateList
+        persistentStates.push(state) unless state in persistentStates
+
+    setHtml5Mode: (mode) -> html5Mode = mode
 
     _compileUrlPattern: (urlPattern, config) ->
       urlPattern = @_escapeRegexSpecialCharacters urlPattern
@@ -59,10 +66,6 @@ angular.module('bicker_router').provider 'Route', (ObjectHelper) ->
 
     _escapeRegexSpecialCharacters: (str) ->
       str.replace /[\-\[\]\/\(\)\*\+\?\\\^\$\|]/g, "\\$&"
-
-    setPersistentStates: (stateList...) ->
-      for state in stateList
-        persistentStates.push(state) unless state in persistentStates
 
     $get: ($location, State, $injector, $q) ->
 
@@ -144,8 +147,7 @@ angular.module('bicker_router').provider 'Route', (ObjectHelper) ->
 
         invokeUrlWriter: (name, data = {}) -> urlWriters[name](data)
 
-        go: (name, data = {}) ->
-          $location.url @invokeUrlWriter name, data
+        go: (name, data = {}) -> $location.url @invokeUrlWriter name, data
 
         getPersistentStates: () ->
           persistentStates
@@ -168,6 +170,8 @@ angular.module('bicker_router').provider 'Route', (ObjectHelper) ->
           @ready = ready
 
         isReady: -> @ready
+
+        isHtml5ModeEnabled: -> html5Mode
 
         whenReady: ->
           @readyDeferred.promise

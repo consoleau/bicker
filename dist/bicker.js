@@ -155,9 +155,14 @@
         var ref, writer, writerName;
         if (iAttrs.ignoreHref === void 0) {
           iElement.click(function(event) {
+            var url;
             event.preventDefault();
+            url = iElement.attr('href');
+            if (!Route.isHtml5ModeEnabled()) {
+              url = url.replace(/^#/, '');
+            }
             return $timeout(function() {
-              return $location.url(iElement.attr('href'));
+              return $location.url(url);
             });
           });
         }
@@ -167,7 +172,13 @@
           scope[writerName + "UrlWriter"] = writer;
         }
         return scope.$watch(iAttrs.routeHref, function(newUrl) {
-          return iElement.attr('href', newUrl);
+          var url;
+          if (Route.isHtml5ModeEnabled()) {
+            url = newUrl;
+          } else {
+            url = '#' + newUrl;
+          }
+          return iElement.attr('href', url);
         });
       }
     };
@@ -623,13 +634,14 @@
     indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   angular.module('bicker_router').provider('Route', function(ObjectHelper) {
-    var persistentStates, provider, ready, tokens, types, urlWriters, urls;
+    var html5Mode, persistentStates, provider, ready, tokens, types, urlWriters, urls;
     tokens = {};
     urlWriters = {};
     urls = [];
     persistentStates = [];
     ready = false;
     types = {};
+    html5Mode = false;
     provider = {
       registerType: function(name, config) {
         types[name] = config;
@@ -666,6 +678,23 @@
           and: this.registerUrl
         }, this);
       },
+      setPersistentStates: function() {
+        var i, len, results, state, stateList;
+        stateList = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+        results = [];
+        for (i = 0, len = stateList.length; i < len; i++) {
+          state = stateList[i];
+          if (indexOf.call(persistentStates, state) < 0) {
+            results.push(persistentStates.push(state));
+          } else {
+            results.push(void 0);
+          }
+        }
+        return results;
+      },
+      setHtml5Mode: function(mode) {
+        return html5Mode = mode;
+      },
       _compileUrlPattern: function(urlPattern, config) {
         var compiledUrl, match, token, tokenList, tokenRegex, urlRegex;
         urlPattern = this._escapeRegexSpecialCharacters(urlPattern);
@@ -695,20 +724,6 @@
       },
       _escapeRegexSpecialCharacters: function(str) {
         return str.replace(/[\-\[\]\/\(\)\*\+\?\\\^\$\|]/g, "\\$&");
-      },
-      setPersistentStates: function() {
-        var i, len, results, state, stateList;
-        stateList = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-        results = [];
-        for (i = 0, len = stateList.length; i < len; i++) {
-          state = stateList[i];
-          if (indexOf.call(persistentStates, state) < 0) {
-            results.push(persistentStates.push(state));
-          } else {
-            results.push(void 0);
-          }
-        }
-        return results;
       },
       $get: function($location, State, $injector, $q) {
         var flashStates, service;
@@ -848,6 +863,9 @@
           },
           isReady: function() {
             return this.ready;
+          },
+          isHtml5ModeEnabled: function() {
+            return html5Mode;
           },
           whenReady: function() {
             return this.readyDeferred.promise;
