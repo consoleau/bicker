@@ -3,7 +3,7 @@ angular.module('bicker_router').provider 'ViewBindings', ->
 
   class View
     constructor: (@name, @bindings) ->
-      @bindings = [bindings] if not (bindings instanceof Array)
+      @bindings = [@bindings] if not (@bindings instanceof Array)
 
     getBindings: -> @bindings
 

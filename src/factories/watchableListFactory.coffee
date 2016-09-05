@@ -9,7 +9,7 @@ angular.module('bicker_router').factory 'WatchableListFactory', (ObjectHelper, W
     getAll: -> @list
 
     getSubset: (paths) ->
-      _.zipObject(paths, _.map(paths, @get, @))
+      _.zipObject(paths, _.map(paths, @get.bind(@)))
 
     set: (path, value) ->
       ObjectHelper.set @list, path, value

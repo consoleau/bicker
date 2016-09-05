@@ -7,11 +7,20 @@ angular.module('bicker_router').directive 'routeHref', (Route, $location, $timeo
     if iAttrs.ignoreHref is undefined
       iElement.click (event) ->
         event.preventDefault()
-        $timeout -> $location.url iElement.attr 'href'
+        url = iElement.attr 'href'
+
+        if !Route.isHtml5ModeEnabled()
+          url = url.replace(/^#/, '')
+          
+        $timeout -> $location.url url
 
     for writerName, writer of Route.getUrlWriters()
       scope["#{writerName}UrlWriter"] = writer
 
     scope.$watch iAttrs.routeHref, (newUrl) ->
-      iElement.attr 'href', newUrl
+      if Route.isHtml5ModeEnabled()
+        url = newUrl
+      else
+        url = '#' + newUrl
+      iElement.attr 'href', url
 

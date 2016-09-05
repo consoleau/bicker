@@ -22,6 +22,10 @@ angular.module('bicker_router').directive 'view', ($compile, $controller, ViewBi
       getStateDataForBinding = (binding) ->
         _.cloneDeep State.getSubset getStateFieldsFromBinding binding
 
+      getComponentFromBinding = (binding) ->
+        source = if binding.component then $injector.get(binding.component + 'Directive')[0] else binding
+        _.defaults(_.pick(source, ['controller', 'templateUrl', 'controllerAs']), { controllerAs: '$ctrl' })
+
       hasRequiredData = (binding) ->
         return true if not binding.requiredState?
 
@@ -47,7 +51,8 @@ angular.module('bicker_router').directive 'view', ($compile, $controller, ViewBi
 
         if not matchingBinding
           if viewCreated
-            $animate.addClass element, 'ng-hide', -> destroyView element
+            $animate.addClass(element, 'ng-hide').then =>
+              destroyView element
             previousBoundState = undefined
             previousBinding = undefined
           return
@@ -67,7 +72,8 @@ angular.module('bicker_router').directive 'view', ($compile, $controller, ViewBi
           delayForRealTemplateInsertion = if hasResolvingTemplate then 300 else undefined
 
           if not viewCreated
-            $animate.removeClass element, 'ng-hide', -> createView element, matchingBinding, delayForRealTemplateInsertion
+            $animate.removeClass(element, 'ng-hide').then =>
+              createView element, matchingBinding, delayForRealTemplateInsertion
           else
             viewScope.$destroy()
             createView element, matchingBinding, delayForRealTemplateInsertion
@@ -87,8 +93,11 @@ angular.module('bicker_router').directive 'view', ($compile, $controller, ViewBi
       createView = (element, binding, minimumDelay) ->
 
         timeStartedMainView = Date.now()
+        component = getComponentFromBinding binding
 
         onSuccessfulResolution = (args) ->
+          return if getMatchingBinding(bindings) isnt binding
+
           viewCreated = true
 
           resolvingTemplateShownTime = Date.now() - timeStartedMainView
@@ -101,12 +110,11 @@ angular.module('bicker_router').directive 'view', ($compile, $controller, ViewBi
             link = $compile element.contents()
             viewScope = viewDirectiveScope.$new()
 
-            if binding.controller
+            if component.controller
               locals = _.merge dependencies, $scope: viewScope
 
-              controller = $controller(binding.controller, locals)
-              element.data('$ngControllerController', controller)
-              element.children().data('$ngControllerController', controller)
+              controller = $controller(component.controller, locals)
+              locals.$scope[component.controllerAs] = controller
 
             link viewScope
 
@@ -127,7 +135,7 @@ angular.module('bicker_router').directive 'view', ($compile, $controller, ViewBi
           $timeout -> PendingViewCounter.decrease() if not binding.manualCompletion
           showResolvingErrorTemplate element, binding
 
-        promises = template: $templateRequest(binding.templateUrl), dependencies: resolve(binding)
+        promises = template: $templateRequest(component.templateUrl), dependencies: resolve(binding)
         $q.all(promises).then(onSuccessfulResolution, onResolutionFailure)
 
       showResolvingTemplate = (element, binding) ->
@@ -168,7 +176,7 @@ angular.module('bicker_router').directive 'view', ($compile, $controller, ViewBi
         _.flatten _.map view.getBindings(), getStateFieldsFromBinding
 
       getFieldsToWatch = (view) ->
-        _.unique _.map getStateFieldsFromView(view), stripNegationPrefix
+        _.uniq _.map getStateFieldsFromView(view), stripNegationPrefix
 
       fields = getFieldsToWatch(view)
 
