@@ -72,6 +72,27 @@ describe 'Router', ->
       expect(State.get('persi')).toBe 'penguin'
       expect(State.unset).toHaveBeenCalledWith ['aonly']
 
+
+  it 'should retain flash state for one route change', ->
+    inject (State, $location, $rootScope, Route) ->
+
+      State.set('flashState1', 'flashValue')
+      State.set('flashState2', 'flashValue2')
+      Route.addFlashStates('flashState1', 'flashState2')
+
+      $location.path '/a'
+      $rootScope.$broadcast '$locationChangeSuccess', 'fake_initial_url'
+
+      expect(State.get('flashState1')).toBe 'flashValue'
+      expect(State.get('flashState2')).toBe 'flashValue2'
+
+      $location.path '/b'
+      $rootScope.$broadcast '$locationChangeSuccess', '/b'
+
+      expect(State.get('flashState1')).toBeUndefined()
+      expect(State.get('flashState2')).toBeUndefined()
+
+
   it 'should set all data extracted from the URL into State', ->
     inject (Route, State, $rootScope) ->
       spyOn(Route, 'match').and.returnValue {}

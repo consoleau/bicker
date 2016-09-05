@@ -57,6 +57,62 @@ describe 'View directive', ->
 
     expect(controller).toHaveBeenCalled()
 
+  it 'can use a component in place of the controller and templateUrl', ->
+    controller = jasmine.createSpy()
+
+    window.angular.mock.module (RouteProvider, ViewBindingsProvider, $compileProvider) ->
+      $compileProvider.component('myComponent', controller: controller, templateUrl: 'stateVariationA.html')
+      ViewBindingsProvider.bind 'viewA', component: 'myComponent'
+
+      return
+
+    mockLocationSuccess()
+    mockTemplateRequest 'stateVariationA.html', 'state variation A template'
+
+    createView 'viewA'
+    triggerOpeningAnimationCompleteCallbacks()
+    deliverMainTemplate()
+
+    expect(controller).toHaveBeenCalled()
+
+  it 'should assign the controller to scope.$ctrl', ->
+    controller = ->
+      this.testing = 1234
+
+    window.angular.mock.module (RouteProvider, ViewBindingsProvider, $compileProvider) ->
+      $compileProvider.component('myComponent', controller: controller, templateUrl: 'stateVariationA.html')
+      ViewBindingsProvider.bind 'viewA', component: 'myComponent'
+
+      return
+
+    mockLocationSuccess()
+    mockTemplateRequest 'stateVariationA.html', '<div>{{$ctrl.testing}}</div>'
+
+    element = createView 'viewA'
+    triggerOpeningAnimationCompleteCallbacks()
+    deliverMainTemplate()
+
+    expect(element.text()).toEqual('1234')
+
+  it 'should allow users to specify the name of the property on scope where the controller will be found via controllerAs', ->
+    controller = ->
+      this.testing = 1234
+
+    window.angular.mock.module (RouteProvider, ViewBindingsProvider, $compileProvider) ->
+      $compileProvider.component('myComponent', controller: controller, controllerAs: 'boop', templateUrl: 'stateVariationA.html')
+      ViewBindingsProvider.bind 'viewA', component: 'myComponent'
+
+      return
+
+    mockLocationSuccess()
+    mockTemplateRequest 'stateVariationA.html', '<div>{{boop.testing}}</div>'
+
+    element = createView 'viewA'
+    triggerOpeningAnimationCompleteCallbacks()
+    deliverMainTemplate()
+
+    expect(element.text()).toEqual('1234')
+
   it 'only binds a view if the required state data matches up to the state of the current page', ->
     controller = jasmine.createSpy()
 
@@ -77,8 +133,6 @@ describe 'View directive', ->
 
     inject ($rootScope, $httpBackend, State) ->
       element = createView 'viewA'
-      triggerOpeningAnimationCompleteCallbacks()
-      $rootScope.$digest() # resolve the empty resolving template promise
       $httpBackend.verifyNoOutstandingRequest()
 
       expect(controller).not.toHaveBeenCalled()
@@ -133,7 +187,7 @@ describe 'View directive', ->
     window.angular.mock.module (RouteProvider, ViewBindingsProvider, $controllerProvider) ->
       RouteProvider.registerUrl '/fake_initial_url'
       $controllerProvider.register 'StateVariationActrl', ['$scope', controller]
-
+      RouteProvider.setPersistentStates 'stateField'
       ViewBindingsProvider.bind 'viewA', {
         controller: 'StateVariationActrl'
         templateUrl: 'stateVariationA.html'
@@ -181,7 +235,7 @@ describe 'View directive', ->
       RouteProvider.registerUrl '/fake_initial_url'
       $controllerProvider.register 'StateVariationActrl', ['$scope', stateAController]
       $controllerProvider.register 'StateVariationBctrl', ['$scope', stateBController]
-
+      RouteProvider.setPersistentStates 'stateFieldA'
       ViewBindingsProvider.bind 'viewA', [viewAstateVariationA, viewAstateVariationB]
 
       return
@@ -233,7 +287,7 @@ describe 'View directive', ->
     window.angular.mock.module (RouteProvider, ViewBindingsProvider, $controllerProvider) ->
       RouteProvider.registerUrl '/fake_initial_url'
       $controllerProvider.register 'StateVariationActrl', ['$scope', stateAController]
-
+      RouteProvider.setPersistentStates 'stateFieldA'
       ViewBindingsProvider.bind 'viewA', [viewAstateVariationA, viewAstateVariationB]
 
       return
@@ -241,7 +295,7 @@ describe 'View directive', ->
     mockTemplateRequest 'stateVariationA.html', '<div id="contentsA"></div>'
     mockLocationSuccess()
 
-    inject (State) ->
+    inject (State, $rootScope) ->
       State.set 'stateFieldA', 'some value'
 
       createView 'viewA'
@@ -586,4 +640,6 @@ describe 'View directive', ->
 
   # The code waits for the animations to run, so we need to trigger the callbacks to pretend that they have run
   triggerOpeningAnimationCompleteCallbacks = ->
-    inject ($animate) -> $animate.triggerCallbacks()
+    inject ($animate, $rootScope) ->
+      $rootScope.$digest()
+      $animate.flush()

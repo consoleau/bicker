@@ -40,3 +40,9 @@ transitions when initially displaying or closing a view.
 1. Requires jquery
 2. Requires angular 1.2 (?)
 3. Requires lodash
+
+#TODO
+1. Identify minimum version of Angular required
+2. Fix animations, these no longer work with angular 1.4
+3. Style example
+4. Document how to run examples

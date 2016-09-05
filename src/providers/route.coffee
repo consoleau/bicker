@@ -5,6 +5,7 @@ angular.module('bicker_router').provider 'Route', (ObjectHelper) ->
   persistentStates = []
   ready = false
   types = {}
+  html5Mode = false
 
   provider =
 
@@ -28,6 +29,12 @@ angular.module('bicker_router').provider 'Route', (ObjectHelper) ->
 
       urls.unshift(_.extend(urlData, config))
       _.extend { and: @registerUrl }, @
+
+    setPersistentStates: (stateList...) ->
+      for state in stateList
+        persistentStates.push(state) unless state in persistentStates
+
+    setHtml5Mode: (mode) -> html5Mode = mode
 
     _compileUrlPattern: (urlPattern, config) ->
       urlPattern = @_escapeRegexSpecialCharacters urlPattern
@@ -60,10 +67,6 @@ angular.module('bicker_router').provider 'Route', (ObjectHelper) ->
     _escapeRegexSpecialCharacters: (str) ->
       str.replace /[\-\[\]\/\(\)\*\+\?\\\^\$\|]/g, "\\$&"
 
-    setPersistentStates: (stateList...) ->
-      for state in stateList
-        persistentStates.push(state) unless state in persistentStates
-
     $get: ($location, State, $injector, $q) ->
 
       # When getting a new instance of the service (only done once), we need to iterate over the urlWriters and turn
@@ -76,6 +79,8 @@ angular.module('bicker_router').provider 'Route', (ObjectHelper) ->
         urlWriters[writerName] = (data = {}) ->
           locals = UrlData: data
           $injector.invoke writer, {}, locals
+
+      flashStates = []
 
       service =
         readyDeferred: $q.defer()
@@ -116,7 +121,7 @@ angular.module('bicker_router').provider 'Route', (ObjectHelper) ->
           data = {}
 
           for key, value of match.url.state
-            ObjectHelper.set data, key, value
+            ObjectHelper.set data, key, (if typeof value is 'object' then _.cloneDeep(value) else value)
 
           data
 
@@ -142,11 +147,19 @@ angular.module('bicker_router').provider 'Route', (ObjectHelper) ->
 
         invokeUrlWriter: (name, data = {}) -> urlWriters[name](data)
 
-        go: (name, data = {}) ->
-          $location.url @invokeUrlWriter name, data
+        go: (name, data = {}) -> $location.url @invokeUrlWriter name, data
 
         getPersistentStates: () ->
           persistentStates
+
+        resetFlashStates: ->
+          flashStates = [];
+
+        addFlashStates: (newStates...) ->
+          flashStates = flashStates.concat(newStates)
+
+        getFlashStates: () ->
+          flashStates
 
         setReady: (ready) ->
           if not ready
@@ -157,6 +170,8 @@ angular.module('bicker_router').provider 'Route', (ObjectHelper) ->
           @ready = ready
 
         isReady: -> @ready
+
+        isHtml5ModeEnabled: -> html5Mode
 
         whenReady: ->
           @readyDeferred.promise

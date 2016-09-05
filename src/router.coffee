@@ -1,4 +1,4 @@
-angular.module('bicker_router', []).run (State, Route, $location, $rootScope, ObjectHelper, PendingViewCounter) ->
+angular.module('bicker_router', ['ngAnimate']).run (State, Route, $location, $rootScope, ObjectHelper, PendingViewCounter) ->
   oldUrl = undefined
   $rootScope.$on '$locationChangeStart', ->
     Route.setReady false if Route.isReady()
@@ -18,7 +18,7 @@ angular.module('bicker_router', []).run (State, Route, $location, $rootScope, Ob
       data = Route.extractData(match)
 
     fieldsToUnset = ObjectHelper.notIn State.list, data
-    fieldsToUnset = _.difference fieldsToUnset, Route.getPersistentStates()
+    fieldsToUnset = _.difference fieldsToUnset, Route.getPersistentStates().concat(Route.getFlashStates())
 
     eventData = unsetting: fieldsToUnset, setting: data
 
@@ -30,6 +30,7 @@ angular.module('bicker_router', []).run (State, Route, $location, $rootScope, Ob
     for key, value of eventData.setting
       State.set key, value
 
+    Route.resetFlashStates()
     Route.setReady true
 
     return
