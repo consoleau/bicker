@@ -147,6 +147,38 @@ describe 'View directive', ->
       expect(controller).toHaveBeenCalled()
       expect(element.find('#contents').length).toBe 1
 
+  it 'will not bind a view if the canActivate function returns false', ->
+    controllerA = jasmine.createSpy('controllerA')
+    controllerB = jasmine.createSpy('controllerB')
+
+    window.angular.mock.module (RouteProvider, ViewBindingsProvider) ->
+      ViewBindingsProvider.bind 'viewA', [
+        {
+          controller: controllerA
+          templateUrl: 'stateVariationA.html'
+          canActivate: () ->
+            return false
+        },
+        {
+          controller: controllerB
+          templateUrl: 'stateVariationB.html'
+          canActivate: () ->
+            return true
+        }
+      ]
+
+      return
+
+    mockLocationSuccess()
+    mockTemplateRequest 'stateVariationB.html', 'state variation B template'
+
+    createView 'viewA'
+    triggerOpeningAnimationCompleteCallbacks()
+    deliverMainTemplate()
+
+    expect(controllerA).not.toHaveBeenCalled()
+    expect(controllerB).toHaveBeenCalled()
+
   it 'binds the view if the required state becomes available after the containing template is processed', ->
     controller = jasmine.createSpy()
 

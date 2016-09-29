@@ -27,9 +27,10 @@ angular.module('bicker_router').directive 'view', ($compile, $controller, ViewBi
         _.defaults(_.pick(source, ['controller', 'templateUrl', 'controllerAs']), { controllerAs: '$ctrl' })
 
       hasRequiredData = (binding) ->
-        return true if not binding.requiredState?
 
-        for requirement in binding.requiredState
+        requiredState = binding.requiredState or []
+
+        for requirement in requiredState
           negateResult = false
           if '!' == requirement.charAt 0
             requirement = requirement.slice 1
@@ -43,6 +44,9 @@ angular.module('bicker_router').directive 'view', ($compile, $controller, ViewBi
           # Only check value of element if it is defined
           element = not element if negateResult
           return false if not element
+
+        if binding.canActivate
+          return false unless $injector.invoke binding.canActivate
 
         return true
 
