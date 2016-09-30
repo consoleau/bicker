@@ -215,13 +215,10 @@
           });
         };
         hasRequiredData = function(binding) {
-          var element, i, len, negateResult, ref, requirement;
-          if (binding.requiredState == null) {
-            return true;
-          }
-          ref = binding.requiredState;
-          for (i = 0, len = ref.length; i < len; i++) {
-            requirement = ref[i];
+          var element, i, len, negateResult, requiredState, requirement;
+          requiredState = binding.requiredState || [];
+          for (i = 0, len = requiredState.length; i < len; i++) {
+            requirement = requiredState[i];
             negateResult = false;
             if ('!' === requirement.charAt(0)) {
               requirement = requirement.slice(1);
@@ -235,6 +232,11 @@
               element = !element;
             }
             if (!element) {
+              return false;
+            }
+          }
+          if (binding.canActivate) {
+            if (!$injector.invoke(binding.canActivate)) {
               return false;
             }
           }
@@ -471,25 +473,6 @@
 
     })();
     return new PendingViewCounter();
-  });
-
-}).call(this);
-
-(function() {
-  angular.module('bicker_router').factory('$templateRequest', function($templateCache, $http, $q) {
-    return function(url) {
-      var deferred, template;
-      template = $templateCache.get(url);
-      if (template != null) {
-        deferred = $q.defer();
-        deferred.resolve(template);
-        return deferred.promise;
-      }
-      return $http.get(url).then(function(response) {
-        $templateCache.put(url, response.data);
-        return response.data;
-      });
-    };
   });
 
 }).call(this);

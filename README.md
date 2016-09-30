@@ -1,3 +1,19 @@
+# Overview
+
+# Install Instructions
+
+1. `npm install`
+1. `bower install`
+
+# Dev Guide
+
+1. Ensure tests pass via `grunt test`
+1. Ensure dist is run before final checkin via `grunt dist`
+
+## Gotchas
+
+1. The tests require port 8080, so if you are running anything (e.g. saas docker stack) on 8080 tests will fail
+
 ### Low-level Process - How does this work?
 1. Angular loads in config mode
 2. Application registers url tokens, urls, url writers and view bindings
@@ -43,6 +59,6 @@ transitions when initially displaying or closing a view.
 
 #TODO
 1. Identify minimum version of Angular required
-2. Fix animations, these no longer work with angular 1.4
-3. Style example
-4. Document how to run examples
+1. Style example
+1. Document how to run examples
+1. Tests shouldn't rely on port 8080
