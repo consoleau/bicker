@@ -32,7 +32,7 @@ describe 'ViewBindings', ->
         expect(ViewBindings.getView('name1').getBindings()).toEqual [1,2]
 
   describe 'bind adds commonRequiredState:', ->
-    
+
     it 'when commonRequiredState is a string and existing requiredState is an array', ->
 
       window.angular.mock.module (ViewBindingsProvider) ->
@@ -90,6 +90,31 @@ describe 'ViewBindings', ->
       inject (ViewBindings) ->
         expect(ViewBindings.getView('name1').getBindings()).toEqual [{ resolve: { 'a': 'a' } }]
 
+  describe 'commonResolvingErrorTemplateUrl:', ->
+
+    it 'adds resolvingErrorTemplateUrl to each binding that does not specify one already', ->
+
+      window.angular.mock.module (ViewBindingsProvider) ->
+        ViewBindingsProvider.bind 'name1',
+          'bindings' : [{}]
+          'commonResolvingErrorTemplateUrl': 'errorUrl'
+        return
+
+      inject (ViewBindings) ->
+        expect(ViewBindings.getView('name1').getBindings()).toEqual [{ resolvingErrorTemplateUrl: 'errorUrl' }]
+
+    it 'does not override resolvingErrorTemplateUrl if already specified', ->
+
+      window.angular.mock.module (ViewBindingsProvider) ->
+        ViewBindingsProvider.bind 'name1',
+          'bindings' : [{ resolvingErrorTemplateUrl: 'alreadyGotOne' }]
+          'commonResolvingErrorTemplateUrl': 'errorUrl'
+        return
+
+      inject (ViewBindings) ->
+        expect(ViewBindings.getView('name1').getBindings()).toEqual [{ resolvingErrorTemplateUrl: 'alreadyGotOne' }]
+
+
   describe 'when bind called with empty array:', ->
 
     it 'throws an error', ->
@@ -103,4 +128,4 @@ describe 'ViewBindings', ->
 
       expect(throwsError).toThrow()
 
-#XXX TODO test for commonResolve 
+#XXX TODO test for commonResolve

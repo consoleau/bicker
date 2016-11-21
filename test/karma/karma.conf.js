@@ -50,7 +50,7 @@ module.exports = function (config) {
     // exclude: ['app/.tmp/spec/cukes/**','app/.tmp/spec/e2e/**', 'app/.tmp/spec/pages/**'],
 
     // web server port
-    port: 8080,
+    port: 12345,
 
     // level of logging
     // possible values: LOG_DISABLE || LOG_ERROR || LOG_WARN || LOG_INFO || LOG_DEBUG

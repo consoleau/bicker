@@ -156,6 +156,10 @@ angular.module('bicker_router').directive 'view', ($compile, $controller, ViewBi
         return if not binding.resolvingErrorTemplateUrl
         $templateRequest(binding.resolvingErrorTemplateUrl).then (template) ->
           element.html template
+          link = $compile element.contents()
+          viewScope = viewDirectiveScope.$new()
+          link viewScope
+
 
       resolve = (binding) ->
         if not binding.resolve or Object.keys(binding.resolve).length is 0
