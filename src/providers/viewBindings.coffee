@@ -23,6 +23,11 @@ angular.module('bicker_router').provider 'ViewBindings', ->
             binding.resolve = {}
           _.defaults binding.resolve, commonResolve
 
+      applycommonResolvingErrorTemplateUrl = (bindings, errorTemplateUrl) ->
+        for binding in newBindings
+          if not ('resolvingErrorTemplateUrl' of binding)
+            binding.resolvingErrorTemplateUrl = errorTemplateUrl
+
       newBindings = []
       if 'bindings' of config
         newBindings = config['bindings']
@@ -37,6 +42,9 @@ angular.module('bicker_router').provider 'ViewBindings', ->
 
       if 'commonResolve' of config
         applyCommonResolve newBindings, config['commonResolve']
+
+      if 'commonResolvingErrorTemplateUrl' of config
+        applycommonResolvingErrorTemplateUrl newBindings, config['commonResolvingErrorTemplateUrl']
 
       views[name] = new View name, newBindings
 

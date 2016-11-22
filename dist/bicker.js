@@ -369,7 +369,11 @@
             return;
           }
           return $templateRequest(binding.resolvingErrorTemplateUrl).then(function(template) {
-            return element.html(template);
+            var link;
+            element.html(template);
+            link = $compile(element.contents());
+            viewScope = viewDirectiveScope.$new();
+            return link(viewScope);
           });
         };
         resolve = function(binding) {
@@ -911,7 +915,7 @@
     })();
     return provider = {
       bind: function(name, config) {
-        var applyCommonRequiredState, applyCommonResolve, newBindings;
+        var applyCommonRequiredState, applyCommonResolve, applycommonResolvingErrorTemplateUrl, newBindings;
         applyCommonRequiredState = function(bindings, commonRequiredState) {
           var binding, i, len, results;
           results = [];
@@ -936,6 +940,19 @@
           }
           return results;
         };
+        applycommonResolvingErrorTemplateUrl = function(bindings, errorTemplateUrl) {
+          var binding, i, len, results;
+          results = [];
+          for (i = 0, len = newBindings.length; i < len; i++) {
+            binding = newBindings[i];
+            if (!('resolvingErrorTemplateUrl' in binding)) {
+              results.push(binding.resolvingErrorTemplateUrl = errorTemplateUrl);
+            } else {
+              results.push(void 0);
+            }
+          }
+          return results;
+        };
         newBindings = [];
         if ('bindings' in config) {
           newBindings = config['bindings'];
@@ -950,6 +967,9 @@
         }
         if ('commonResolve' in config) {
           applyCommonResolve(newBindings, config['commonResolve']);
+        }
+        if ('commonResolvingErrorTemplateUrl' in config) {
+          applycommonResolvingErrorTemplateUrl(newBindings, config['commonResolvingErrorTemplateUrl']);
         }
         return views[name] = new View(name, newBindings);
       },
