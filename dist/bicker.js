@@ -187,7 +187,7 @@
 }).call(this);
 
 (function() {
-  angular.module('bicker_router').directive('view', function($compile, $controller, ViewBindings, $q, State, $rootScope, $animate, $timeout, $injector, PendingViewCounter, $templateRequest, Route) {
+  angular.module('bicker_router').directive('view', function($log, $compile, $controller, ViewBindings, $q, State, $rootScope, $animate, $timeout, $injector, PendingViewCounter, $templateRequest, Route) {
     var directive;
     directive = {
       restrict: 'E',
@@ -338,12 +338,13 @@
               return injectMainTemplate();
             }
           };
-          onResolutionFailure = function() {
+          onResolutionFailure = function(error) {
             $timeout(function() {
               if (!binding.manualCompletion) {
                 return PendingViewCounter.decrease();
               }
             });
+            $log.error(error);
             return showResolvingErrorTemplate(element, binding);
           };
           promises = {

@@ -1,6 +1,6 @@
 # @TODO none of the animation code in this directive has been tested. Not sure if it can be at this stage This needs further investigation.
 # @TODO this code does too much, it should be refactored, but I need to get this out ASAP
-angular.module('bicker_router').directive 'view', ($compile, $controller, ViewBindings, $q, State, $rootScope, $animate, $timeout, $injector, PendingViewCounter, $templateRequest, Route) ->
+angular.module('bicker_router').directive 'view', ($log, $compile, $controller, ViewBindings, $q, State, $rootScope, $animate, $timeout, $injector, PendingViewCounter, $templateRequest, Route) ->
   directive =
     restrict: 'E'
     scope: false
@@ -135,8 +135,9 @@ angular.module('bicker_router').directive 'view', ($compile, $controller, ViewBi
           else
             injectMainTemplate()
 
-        onResolutionFailure = ->
+        onResolutionFailure = (error) ->
           $timeout -> PendingViewCounter.decrease() if not binding.manualCompletion
+          $log.error error
           showResolvingErrorTemplate element, binding
 
         promises = template: $templateRequest(component.templateUrl), dependencies: resolve(binding)
