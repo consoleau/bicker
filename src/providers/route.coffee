@@ -27,7 +27,7 @@ angular.module('bicker_router').provider 'Route', (ObjectHelper) ->
         compiledUrl: @_compileUrlPattern(pattern, config)
         pattern: pattern
 
-      urls.unshift(_.extend(urlData, config))
+      urls.push(_.extend(urlData, config))
       _.extend { and: @registerUrl }, @
 
     setPersistentStates: (stateList...) ->

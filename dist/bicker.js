@@ -661,7 +661,7 @@
           compiledUrl: this._compileUrlPattern(pattern, config),
           pattern: pattern
         };
-        urls.unshift(_.extend(urlData, config));
+        urls.push(_.extend(urlData, config));
         return _.extend({
           and: this.registerUrl
         }, this);
