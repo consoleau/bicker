@@ -112,6 +112,20 @@ describe 'Route', ->
 
 
   describe 'match', ->
+    it 'should match the first matching URL', ->
+      urlA = '/{tokenA}'
+      urlB = '/A'
+
+      window.angular.mock.module (RouteProvider) ->
+        RouteProvider.registerUrlToken 'tokenA', type: 'alpha'
+          .registerUrl urlA
+          .registerUrl urlB
+        return
+
+      inject (Route) ->
+        result = Route.match '/A'
+        expect(result.url.pattern).toEqual '/{tokenA}'
+
     it 'should return an object with a compiled URL and a regex match', ->
       urlDefinition = '/{tokenA}/{tokenB}/c'
 
