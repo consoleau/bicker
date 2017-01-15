@@ -1,5 +1,6 @@
 (function() {
-  angular.module('bicker_router', ['ngAnimate']).run(function(State, Route, $location, $rootScope, ObjectHelper, PendingViewCounter) {
+  angular.module('bicker_router', ['ngAnimate']).run(["State", "Route", "$location", "$rootScope", "ObjectHelper", "PendingViewCounter", function(State, Route, $location, $rootScope, ObjectHelper, PendingViewCounter) {
+    "ngInject";
     var oldUrl;
     oldUrl = void 0;
     $rootScope.$on('$locationChangeStart', function() {
@@ -38,7 +39,7 @@
       Route.resetFlashStates();
       Route.setReady(true);
     });
-  });
+  }]);
 
 }).call(this);
 
@@ -147,7 +148,7 @@
 }).call(this);
 
 (function() {
-  angular.module('bicker_router').directive('routeHref', function(Route, $location, $timeout) {
+  angular.module('bicker_router').directive('routeHref', ["Route", "$location", "$timeout", function(Route, $location, $timeout) {
     return {
       restrict: 'A',
       scope: true,
@@ -182,12 +183,12 @@
         });
       }
     };
-  });
+  }]);
 
 }).call(this);
 
 (function() {
-  angular.module('bicker_router').directive('view', function($log, $compile, $controller, ViewBindings, $q, State, $rootScope, $animate, $timeout, $injector, PendingViewCounter, $templateRequest, Route) {
+  angular.module('bicker_router').directive('view', ["$log", "$compile", "$controller", "ViewBindings", "$q", "State", "$rootScope", "$animate", "$timeout", "$injector", "PendingViewCounter", "$templateRequest", "Route", function($log, $compile, $controller, ViewBindings, $q, State, $rootScope, $animate, $timeout, $injector, PendingViewCounter, $templateRequest, Route) {
     var directive;
     directive = {
       restrict: 'E',
@@ -435,12 +436,12 @@
       }
     };
     return directive;
-  });
+  }]);
 
 }).call(this);
 
 (function() {
-  angular.module('bicker_router').factory('PendingViewCounter', function($rootScope) {
+  angular.module('bicker_router').factory('PendingViewCounter', ["$rootScope", function($rootScope) {
     var PendingViewCounter;
     PendingViewCounter = (function() {
       function PendingViewCounter() {}
@@ -478,12 +479,12 @@
 
     })();
     return new PendingViewCounter();
-  });
+  }]);
 
 }).call(this);
 
 (function() {
-  angular.module('bicker_router').factory('WatchableListFactory', function(ObjectHelper, WatcherFactory) {
+  angular.module('bicker_router').factory('WatchableListFactory', ["ObjectHelper", "WatcherFactory", function(ObjectHelper, WatcherFactory) {
     var WatchableList, factory;
     WatchableList = (function() {
       function WatchableList(list) {
@@ -576,7 +577,7 @@
         return new WatchableList(data);
       }
     };
-  });
+  }]);
 
 }).call(this);
 
@@ -621,7 +622,7 @@
   var slice = [].slice,
     indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-  angular.module('bicker_router').provider('Route', function(ObjectHelper) {
+  angular.module('bicker_router').provider('Route', ["ObjectHelper", function(ObjectHelper) {
     var html5Mode, persistentStates, provider, ready, tokens, types, urlWriters, urls;
     tokens = {};
     urlWriters = {};
@@ -713,7 +714,7 @@
       _escapeRegexSpecialCharacters: function(str) {
         return str.replace(/[\-\[\]\/\(\)\*\+\?\\\^\$\|]/g, "\\$&");
       },
-      $get: function($location, State, $injector, $q) {
+      $get: ["$location", "State", "$injector", "$q", function($location, State, $injector, $q) {
         var flashStates, service;
         _.forIn(urlWriters, function(writer, writerName) {
           return urlWriters[writerName] = function(data) {
@@ -860,7 +861,7 @@
           }
         };
         return service;
-      }
+      }]
     };
     provider.registerType('numeric', {
       regex: /\d+/,
@@ -877,18 +878,18 @@
       regex: /.+/
     });
     return provider;
-  });
+  }]);
 
 }).call(this);
 
 (function() {
   angular.module('bicker_router').provider('State', function() {
     return {
-      $get: function(WatchableListFactory) {
+      $get: ["WatchableListFactory", function(WatchableListFactory) {
         var stateService;
         stateService = WatchableListFactory.create();
         return stateService;
-      }
+      }]
     };
   });
 

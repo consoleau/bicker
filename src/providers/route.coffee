@@ -1,4 +1,5 @@
 angular.module('bicker_router').provider 'Route', (ObjectHelper) ->
+  "ngInject";
   tokens = {}
   urlWriters = {}
   urls = []
