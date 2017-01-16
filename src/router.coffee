@@ -1,4 +1,5 @@
 angular.module('bicker_router', ['ngAnimate']).run (State, Route, $location, $rootScope, ObjectHelper, PendingViewCounter) ->
+  "ngInject";
   oldUrl = undefined
   $rootScope.$on '$locationChangeStart', ->
     Route.setReady false if Route.isReady()

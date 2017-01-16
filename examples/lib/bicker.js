@@ -1,5 +1,6 @@
 (function() {
-  angular.module('bicker_router', ['ngAnimate']).run(function(State, Route, $location, $rootScope, ObjectHelper, PendingViewCounter) {
+  angular.module('bicker_router', ['ngAnimate']).run(["State", "Route", "$location", "$rootScope", "ObjectHelper", "PendingViewCounter", function(State, Route, $location, $rootScope, ObjectHelper, PendingViewCounter) {
+    "ngInject";
     var oldUrl;
     oldUrl = void 0;
     $rootScope.$on('$locationChangeStart', function() {
@@ -38,7 +39,7 @@
       Route.resetFlashStates();
       Route.setReady(true);
     });
-  });
+  }]);
 
 }).call(this);
 
@@ -147,7 +148,7 @@
 }).call(this);
 
 (function() {
-  angular.module('bicker_router').directive('routeHref', function(Route, $location, $timeout) {
+  angular.module('bicker_router').directive('routeHref', ["Route", "$location", "$timeout", function(Route, $location, $timeout) {
     return {
       restrict: 'A',
       scope: true,
@@ -182,12 +183,12 @@
         });
       }
     };
-  });
+  }]);
 
 }).call(this);
 
 (function() {
-  angular.module('bicker_router').directive('view', function($compile, $controller, ViewBindings, $q, State, $rootScope, $animate, $timeout, $injector, PendingViewCounter, $templateRequest, Route) {
+  angular.module('bicker_router').directive('view', ["$log", "$compile", "$controller", "ViewBindings", "$q", "State", "$rootScope", "$animate", "$timeout", "$injector", "PendingViewCounter", "$templateRequest", "Route", function($log, $compile, $controller, ViewBindings, $q, State, $rootScope, $animate, $timeout, $injector, PendingViewCounter, $templateRequest, Route) {
     var directive;
     directive = {
       restrict: 'E',
@@ -215,13 +216,10 @@
           });
         };
         hasRequiredData = function(binding) {
-          var element, i, len, negateResult, ref, requirement;
-          if (binding.requiredState == null) {
-            return true;
-          }
-          ref = binding.requiredState;
-          for (i = 0, len = ref.length; i < len; i++) {
-            requirement = ref[i];
+          var element, i, len, negateResult, requiredState, requirement;
+          requiredState = binding.requiredState || [];
+          for (i = 0, len = requiredState.length; i < len; i++) {
+            requirement = requiredState[i];
             negateResult = false;
             if ('!' === requirement.charAt(0)) {
               requirement = requirement.slice(1);
@@ -235,6 +233,11 @@
               element = !element;
             }
             if (!element) {
+              return false;
+            }
+          }
+          if (binding.canActivate) {
+            if (!$injector.invoke(binding.canActivate)) {
               return false;
             }
           }
@@ -336,12 +339,13 @@
               return injectMainTemplate();
             }
           };
-          onResolutionFailure = function() {
+          onResolutionFailure = function(error) {
             $timeout(function() {
               if (!binding.manualCompletion) {
                 return PendingViewCounter.decrease();
               }
             });
+            $log.error(error);
             return showResolvingErrorTemplate(element, binding);
           };
           promises = {
@@ -367,7 +371,11 @@
             return;
           }
           return $templateRequest(binding.resolvingErrorTemplateUrl).then(function(template) {
-            return element.html(template);
+            var link;
+            element.html(template);
+            link = $compile(element.contents());
+            viewScope = viewDirectiveScope.$new();
+            return link(viewScope);
           });
         };
         resolve = function(binding) {
@@ -428,12 +436,12 @@
       }
     };
     return directive;
-  });
+  }]);
 
 }).call(this);
 
 (function() {
-  angular.module('bicker_router').factory('PendingViewCounter', function($rootScope) {
+  angular.module('bicker_router').factory('PendingViewCounter', ["$rootScope", function($rootScope) {
     var PendingViewCounter;
     PendingViewCounter = (function() {
       function PendingViewCounter() {}
@@ -471,31 +479,12 @@
 
     })();
     return new PendingViewCounter();
-  });
+  }]);
 
 }).call(this);
 
 (function() {
-  angular.module('bicker_router').factory('$templateRequest', function($templateCache, $http, $q) {
-    return function(url) {
-      var deferred, template;
-      template = $templateCache.get(url);
-      if (template != null) {
-        deferred = $q.defer();
-        deferred.resolve(template);
-        return deferred.promise;
-      }
-      return $http.get(url).then(function(response) {
-        $templateCache.put(url, response.data);
-        return response.data;
-      });
-    };
-  });
-
-}).call(this);
-
-(function() {
-  angular.module('bicker_router').factory('WatchableListFactory', function(ObjectHelper, WatcherFactory) {
+  angular.module('bicker_router').factory('WatchableListFactory', ["ObjectHelper", "WatcherFactory", function(ObjectHelper, WatcherFactory) {
     var WatchableList, factory;
     WatchableList = (function() {
       function WatchableList(list) {
@@ -588,7 +577,7 @@
         return new WatchableList(data);
       }
     };
-  });
+  }]);
 
 }).call(this);
 
@@ -633,7 +622,7 @@
   var slice = [].slice,
     indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-  angular.module('bicker_router').provider('Route', function(ObjectHelper) {
+  angular.module('bicker_router').provider('Route', ["ObjectHelper", function(ObjectHelper) {
     var html5Mode, persistentStates, provider, ready, tokens, types, urlWriters, urls;
     tokens = {};
     urlWriters = {};
@@ -673,7 +662,7 @@
           compiledUrl: this._compileUrlPattern(pattern, config),
           pattern: pattern
         };
-        urls.unshift(_.extend(urlData, config));
+        urls.push(_.extend(urlData, config));
         return _.extend({
           and: this.registerUrl
         }, this);
@@ -725,7 +714,7 @@
       _escapeRegexSpecialCharacters: function(str) {
         return str.replace(/[\-\[\]\/\(\)\*\+\?\\\^\$\|]/g, "\\$&");
       },
-      $get: function($location, State, $injector, $q) {
+      $get: ["$location", "State", "$injector", "$q", function($location, State, $injector, $q) {
         var flashStates, service;
         _.forIn(urlWriters, function(writer, writerName) {
           return urlWriters[writerName] = function(data) {
@@ -872,7 +861,7 @@
           }
         };
         return service;
-      }
+      }]
     };
     provider.registerType('numeric', {
       regex: /\d+/,
@@ -889,18 +878,18 @@
       regex: /.+/
     });
     return provider;
-  });
+  }]);
 
 }).call(this);
 
 (function() {
   angular.module('bicker_router').provider('State', function() {
     return {
-      $get: function(WatchableListFactory) {
+      $get: ["WatchableListFactory", function(WatchableListFactory) {
         var stateService;
         stateService = WatchableListFactory.create();
         return stateService;
-      }
+      }]
     };
   });
 
@@ -928,7 +917,7 @@
     })();
     return provider = {
       bind: function(name, config) {
-        var applyCommonRequiredState, applyCommonResolve, newBindings;
+        var applyCommonRequiredState, applyCommonResolve, applycommonResolvingErrorTemplateUrl, newBindings;
         applyCommonRequiredState = function(bindings, commonRequiredState) {
           var binding, i, len, results;
           results = [];
@@ -953,6 +942,19 @@
           }
           return results;
         };
+        applycommonResolvingErrorTemplateUrl = function(bindings, errorTemplateUrl) {
+          var binding, i, len, results;
+          results = [];
+          for (i = 0, len = newBindings.length; i < len; i++) {
+            binding = newBindings[i];
+            if (!('resolvingErrorTemplateUrl' in binding)) {
+              results.push(binding.resolvingErrorTemplateUrl = errorTemplateUrl);
+            } else {
+              results.push(void 0);
+            }
+          }
+          return results;
+        };
         newBindings = [];
         if ('bindings' in config) {
           newBindings = config['bindings'];
@@ -967,6 +969,9 @@
         }
         if ('commonResolve' in config) {
           applyCommonResolve(newBindings, config['commonResolve']);
+        }
+        if ('commonResolvingErrorTemplateUrl' in config) {
+          applycommonResolvingErrorTemplateUrl(newBindings, config['commonResolvingErrorTemplateUrl']);
         }
         return views[name] = new View(name, newBindings);
       },

@@ -6,6 +6,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-karma'
   grunt.loadNpmTasks 'grunt-express-server'
   grunt.loadNpmTasks 'grunt-contrib-copy'
+  grunt.loadNpmTasks 'grunt-ng-annotate'
 
   grunt.initConfig
     coffee:
@@ -17,11 +18,17 @@ module.exports = (grunt) ->
           dest: 'build'
           ext: '.js'
         ]
+
     concat:
       dist:
         # Bring in router.coffee first because it registers the angular module
         src: ['build/router.js', 'build/**/*.js']
         dest: 'dist/bicker.js'
+
+    ngAnnotate:
+      dist:
+        files:
+          'dist/bicker.js': 'dist/bicker.js'
 
     uglify:
       options:
@@ -63,7 +70,7 @@ module.exports = (grunt) ->
             dest: 'examples/lib/bicker.js'
         ]
 
-  grunt.registerTask 'dist', ['clean:dist', 'coffee:dist', 'concat:dist', 'uglify:dist']
+  grunt.registerTask 'dist', ['clean:dist', 'coffee:dist', 'concat:dist', 'ngAnnotate:dist', 'uglify:dist']
   grunt.registerTask 'default', ['dist']
   grunt.registerTask 'test', ['karma']
   grunt.registerTask 'example', ['clean:example','copy:example','express:example']
