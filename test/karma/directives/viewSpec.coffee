@@ -23,7 +23,7 @@ describe 'View directive', ->
       return
 
       mockLocationNotReady()
-      mockTemplateRequest 'stateVariationA.html', 'state variation A template'
+      mockTemplateRequest 'stateVariationA.html', '<div>state variation A template</div>'
 
       inject ($rootScope, $httpBackend) ->
         element = createView 'viewA'
@@ -49,7 +49,7 @@ describe 'View directive', ->
       return
 
     mockLocationSuccess()
-    mockTemplateRequest 'stateVariationA.html', 'state variation A template'
+    mockTemplateRequest 'stateVariationA.html', '<div>state variation A template</div>'
 
     createView 'viewA'
     triggerOpeningAnimationCompleteCallbacks()
@@ -67,13 +67,30 @@ describe 'View directive', ->
       return
 
     mockLocationSuccess()
-    mockTemplateRequest 'stateVariationA.html', 'state variation A template'
+    mockTemplateRequest 'stateVariationA.html', '<div>state variation A template</div>'
 
     createView 'viewA'
     triggerOpeningAnimationCompleteCallbacks()
     deliverMainTemplate()
 
     expect(controller).toHaveBeenCalled()
+
+#   NB: This test will blow up if $element is not available because Angular will throw an exception
+  it 'provides $element to controllers when requested', ->
+    controller = jasmine.createSpy()
+
+    window.angular.mock.module (RouteProvider, ViewBindingsProvider, $compileProvider) ->
+      $compileProvider.component('myComponent', controller: controller, templateUrl: 'stateVariationA.html')
+      ViewBindingsProvider.bind 'viewA', component: 'myComponent'
+
+      return
+
+    mockLocationSuccess()
+    mockTemplateRequest 'stateVariationA.html', '<div>state variation A template</div>'
+
+    createView 'viewA'
+    triggerOpeningAnimationCompleteCallbacks()
+    deliverMainTemplate()
 
   it 'should assign the controller to scope.$ctrl', ->
     controller = ->
@@ -170,7 +187,7 @@ describe 'View directive', ->
       return
 
     mockLocationSuccess()
-    mockTemplateRequest 'stateVariationB.html', 'state variation B template'
+    mockTemplateRequest 'stateVariationB.html', '<div>state variation B template</div>'
 
     createView 'viewA'
     triggerOpeningAnimationCompleteCallbacks()
@@ -218,7 +235,7 @@ describe 'View directive', ->
 
     window.angular.mock.module (RouteProvider, ViewBindingsProvider, $controllerProvider) ->
       RouteProvider.registerUrl '/fake_initial_url'
-      $controllerProvider.register 'StateVariationActrl', ['$scope', controller]
+      $controllerProvider.register 'StateVariationActrl', ['$scope', '$element', controller]
       RouteProvider.setPersistentStates 'stateField'
       ViewBindingsProvider.bind 'viewA', {
         controller: 'StateVariationActrl'
@@ -246,6 +263,40 @@ describe 'View directive', ->
       triggerOpeningAnimationCompleteCallbacks()
 
       expect(element.find('#contents').length).toBe 0
+
+  it 'results in $element $destroy event being triggered when the view binding is removed', ->
+    destroyCalledCounter = 0
+
+    controller = ($element) ->
+      $element.$on('$destroy', () -> destroyCalledCounter += 1)
+
+    window.angular.mock.module (RouteProvider, ViewBindingsProvider, $controllerProvider) ->
+      RouteProvider.registerUrl '/fake_initial_url'
+      $controllerProvider.register 'StateVariationActrl', ['$scope', '$element', controller]
+      RouteProvider.setPersistentStates 'stateField'
+      ViewBindingsProvider.bind 'viewA', {
+        controller: 'StateVariationActrl'
+        templateUrl: 'stateVariationA.html'
+        requiredState: ['stateField']
+      }
+
+      return
+
+    mockTemplateRequest 'stateVariationA.html', '<div id="contents"></div>'
+    mockLocationSuccess()
+
+    inject ($compile, $httpBackend, State) ->
+      State.set 'stateField', 'some value'
+
+      element = createView 'viewA'
+      triggerOpeningAnimationCompleteCallbacks()
+      deliverMainTemplate()
+
+      State.unset 'stateField'
+      triggerStateChangeEventConslidationTimeout()
+      triggerOpeningAnimationCompleteCallbacks()
+
+      expect(destroyCalledCounter).toBe 1
 
   it 'will switch between different bindings for the same view when watched/required state changes', ->
     stateAController = jasmine.createSpy 'stateAController'
@@ -356,7 +407,7 @@ describe 'View directive', ->
 
       return
 
-    templateContents = 'state variation A template'
+    templateContents = '<div>state variation A template</div>'
     mockTemplateRequest 'stateVariationA.html', templateContents
     mockLocationSuccess()
 
@@ -395,7 +446,7 @@ describe 'View directive', ->
       return
 
     mockLocationSuccess()
-    mockTemplateRequest 'viewA.html', 'view A template <view name="viewB"></view>'
+    mockTemplateRequest 'viewA.html', '<div>view A template <view name="viewB"></view></div>'
     mockTemplateRequest 'viewB.html', '<div id="viewB">view B template</div>'
 
     element = createView 'viewA'
@@ -465,8 +516,8 @@ describe 'View directive', ->
 
       return
 
-    mockTemplateRequest 'viewA.html', 'view A template'
-    mockTemplateRequest 'resolving.html', 'resolving template'
+    mockTemplateRequest 'viewA.html', '<div>view A template</div>'
+    mockTemplateRequest 'resolving.html', '<div>resolving template</div>'
     mockLocationSuccess()
 
     inject ($rootScope) ->
@@ -500,9 +551,9 @@ describe 'View directive', ->
 
       return
 
-    mockTemplateRequest 'viewA.html', 'view A template'
-    mockTemplateRequest 'error.html', 'error template'
-    mockTemplateRequest 'resolving.html', 'resolving template'
+    mockTemplateRequest 'viewA.html', '<div>view A template</div>'
+    mockTemplateRequest 'error.html', '<div>error template</div>'
+    mockTemplateRequest 'resolving.html', '<div>resolving template</div>'
     mockLocationSuccess()
 
     element = createView 'viewA'
@@ -550,8 +601,8 @@ describe 'View directive', ->
 
       return
 
-    mockTemplateRequest 'viewA.html', 'view A template'
-    mockTemplateRequest 'resolving.html', 'resolving template'
+    mockTemplateRequest 'viewA.html', '<div>view A template</div>'
+    mockTemplateRequest 'resolving.html', '<div>resolving template</div>'
     mockLocationSuccess()
 
     inject ($rootScope, $compile, $httpBackend, $animate, $timeout, PendingViewCounter) ->
@@ -593,8 +644,8 @@ describe 'View directive', ->
 
       return
 
-    mockTemplateRequest 'viewA.html', 'view A template'
-    mockTemplateRequest 'resolving.html', 'resolving template'
+    mockTemplateRequest 'viewA.html', '<div>view A template</div>'
+    mockTemplateRequest 'resolving.html', '<div>resolving template</div>'
     mockLocationSuccess()
 
     inject ($rootScope, $compile, $httpBackend, $animate, $timeout, PendingViewCounter) ->
