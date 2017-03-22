@@ -91,7 +91,7 @@ angular.module('bicker_router').directive 'view', ($log, $compile, $controller, 
       destroyView = (element) ->
         return if viewCreated is false
         viewCreated = false
-        element.html ''
+        element.children().eq(0).remove();
         viewScope.$destroy()
 
       createView = (element, binding, minimumDelay) ->
@@ -115,7 +115,7 @@ angular.module('bicker_router').directive 'view', ($log, $compile, $controller, 
             viewScope = viewDirectiveScope.$new()
 
             if component.controller
-              locals = _.merge dependencies, $scope: viewScope
+              locals = _.merge dependencies, { $scope: viewScope, $element: element.children().eq(0) }
 
               controller = $controller(component.controller, locals)
               locals.$scope[component.controllerAs] = controller

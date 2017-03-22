@@ -295,7 +295,7 @@
             return;
           }
           viewCreated = false;
-          element.html('');
+          element.children().eq(0).remove();
           return viewScope.$destroy();
         };
         createView = function(element, binding, minimumDelay) {
@@ -318,7 +318,8 @@
               viewScope = viewDirectiveScope.$new();
               if (component.controller) {
                 locals = _.merge(dependencies, {
-                  $scope: viewScope
+                  $scope: viewScope,
+                  $element: element.children().eq(0)
                 });
                 controller = $controller(component.controller, locals);
                 locals.$scope[component.controllerAs] = controller;
@@ -623,6 +624,7 @@
     indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   angular.module('bicker_router').provider('Route', ["ObjectHelper", function(ObjectHelper) {
+    "ngInject";
     var html5Mode, persistentStates, provider, ready, tokens, types, urlWriters, urls;
     tokens = {};
     urlWriters = {};
