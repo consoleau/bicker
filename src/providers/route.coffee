@@ -182,5 +182,6 @@ angular.module('bicker_router').provider 'Route', (ObjectHelper) ->
   provider.registerType 'numeric', regex: /\d+/, parser: ['token', (token) -> parseInt token]
   provider.registerType 'alpha', regex: /[a-zA-Z]+/
   provider.registerType 'any', regex: /.+/
+  provider.registerType 'list', regex: /.+/, parser: ['token', (token) -> token.split ',']
 
   return provider

@@ -110,6 +110,40 @@ describe 'Route', ->
             expect(result.url.compiledUrl.tokens).toBeInstanceOf Object
             expect(result.regexMatch).toBeInstanceOf Object
 
+      describe 'lists', ->
+        urlDefinition = '/something/{someList}/something'
+
+        beforeEach ->
+          window.angular.mock.module (RouteProvider) ->
+            RouteProvider.registerUrlToken 'someList', type: 'list'
+            RouteProvider.registerUrl urlDefinition
+            return
+
+        describe 'with a single value', ->
+          it 'should match against a URL with a single value in the specified location', ->
+            inject (Route) ->
+              result = Route.match '/something/abc/something'
+              expect(result.url.pattern).toEqual urlDefinition
+              expect(result.url.compiledUrl.tokens).toBeInstanceOf Object
+              expect(result.regexMatch).toBeInstanceOf Object
+
+          it 'returns an array with the value from the specified location in the URL', ->
+            inject (Route) ->
+              result = Route.match '/something/abc/something'
+              expect(Route.extractData result).toEqual { someList: ['abc'] }
+
+        describe 'with multiple values separated by a comma', ->
+          it 'should match against a URL with multiple values separated by a comma in the specified location', ->
+            inject (Route) ->
+              result = Route.match '/something/a,b,c/something'
+              expect(result.url.pattern).toEqual urlDefinition
+              expect(result.url.compiledUrl.tokens).toBeInstanceOf Object
+              expect(result.regexMatch).toBeInstanceOf Object
+
+          it 'returns the array of values ', ->
+            inject (Route) ->
+              result = Route.match '/something/a,b,c/something'
+              expect(Route.extractData result).toEqual { someList: ['a', 'b', 'c'] }
 
   describe 'match', ->
     it 'should match the first matching URL', ->
