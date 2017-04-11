@@ -90,30 +90,50 @@ describe 'ViewBindings', ->
       inject (ViewBindings) ->
         expect(ViewBindings.getView('name1').getBindings()).toEqual [{ resolve: { 'a': 'a' } }]
 
-  describe 'commonResolvingErrorTemplateUrl:', ->
+  describe 'Application of basic common fields', ->
+    basicCommonFields = [
+      { name: 'commonResolvingErrorTemplateUrl', overrideField: 'resolvingErrorTemplateUrl' },
+      { name: 'commonResolvingErrorComponent', overrideField: 'resolvingErrorComponent' },
+      { name: 'commonErrorComponent', overrideField: 'errorComponent' },
+      { name: 'commonErrorTemplateUrl', overrideField: 'errorTemplateUrl' }
+    ]
 
-    it 'adds resolvingErrorTemplateUrl to each binding that does not specify one already', ->
+    for commonField in basicCommonFields
+      do (commonField) ->
+        describe "#{commonField.name}:", ->
+          it "adds #{commonField.overrideField} to each binding that does not specify one already", ->
+            window.angular.mock.module (ViewBindingsProvider) ->
+              viewBinding =
+                bindings: [{}]
 
-      window.angular.mock.module (ViewBindingsProvider) ->
-        ViewBindingsProvider.bind 'name1',
-          'bindings' : [{}]
-          'commonResolvingErrorTemplateUrl': 'errorUrl'
-        return
+              viewBinding[commonField.name] = 'commonValue';
+              ViewBindingsProvider.bind 'name1', viewBinding
+              return
 
-      inject (ViewBindings) ->
-        expect(ViewBindings.getView('name1').getBindings()).toEqual [{ resolvingErrorTemplateUrl: 'errorUrl' }]
+            inject (ViewBindings) ->
+              expectedBinding = {}
+              expectedBinding[commonField.overrideField] = 'commonValue'
+              expect(ViewBindings.getView('name1').getBindings()).toEqual [expectedBinding]
 
-    it 'does not override resolvingErrorTemplateUrl if already specified', ->
+          it "does not override #{commonField.overrideField} if already specified", ->
 
-      window.angular.mock.module (ViewBindingsProvider) ->
-        ViewBindingsProvider.bind 'name1',
-          'bindings' : [{ resolvingErrorTemplateUrl: 'alreadyGotOne' }]
-          'commonResolvingErrorTemplateUrl': 'errorUrl'
-        return
+            window.angular.mock.module (ViewBindingsProvider) ->
+              bindingWithExistingValue = {}
+              bindingWithExistingValue[commonField.overrideField] = 'specificValue'
 
-      inject (ViewBindings) ->
-        expect(ViewBindings.getView('name1').getBindings()).toEqual [{ resolvingErrorTemplateUrl: 'alreadyGotOne' }]
+              viewBinding =
+                bindings: [bindingWithExistingValue]
 
+              viewBinding[commonField.name] = 'someValue';
+
+              ViewBindingsProvider.bind 'name1', viewBinding
+              return
+
+            inject (ViewBindings) ->
+              expectedBinding = {}
+              expectedBinding[commonField.overrideField] = 'specificValue'
+
+              expect(ViewBindings.getView('name1').getBindings()).toEqual [expectedBinding]
 
   describe 'when bind called with empty array:', ->
 

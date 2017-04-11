@@ -534,7 +534,7 @@ describe 'View directive', ->
       triggerResolvingTemplateDelayTimeout()
       expect(element.text()).toBe 'view A template'
 
-  it 'should show the resolvingErrorTemplateUrl if any of the promises is rejected', ->
+  it 'should show the resolvingErrorTemplateUrl if any of the promises are rejected', ->
     deferred = undefined
 
     window.angular.mock.module (RouteProvider, ViewBindingsProvider) ->
@@ -566,6 +566,130 @@ describe 'View directive', ->
     deferred.reject()
     deliverErrorTemplate()
 
+    expect(element.text()).toBe 'error template'
+
+  it 'should show the resolvingErrorTemplateUrl if any of the resolve functions throw an error', ->
+    window.angular.mock.module (RouteProvider, ViewBindingsProvider) ->
+      RouteProvider.registerUrl '/fake_initial_url'
+      ViewBindingsProvider.bind 'viewA', {
+        templateUrl: 'viewA.html'
+        resolvingTemplateUrl: 'resolving.html'
+        resolvingErrorTemplateUrl: 'error.html'
+        resolve:
+          PromisedDependency: -> throw new Error('nope!')
+      }
+
+      return
+
+    mockTemplateRequest 'viewA.html', '<div>view A template</div>'
+    mockTemplateRequest 'error.html', '<div>error template</div>'
+    mockTemplateRequest 'resolving.html', '<div>resolving template</div>'
+    mockLocationSuccess()
+
+    element = createView 'viewA'
+
+    deliverResolvingTemplate()
+    triggerResolvingTemplateDelayTimeout()
+    triggerOpeningAnimationCompleteCallbacks()
+    expect(element.text()).toBe 'resolving template'
+
+    deliverErrorTemplate()
+
+    expect(element.text()).toBe 'error template'
+
+  it 'should show the resolvingErrorComponent if any of the promises are rejected', ->
+    deferred = undefined
+    error = new Error 'nope'
+    controller = jasmine.createSpy 'error component controller'
+
+    window.angular.mock.module (RouteProvider, ViewBindingsProvider, $compileProvider) ->
+      $compileProvider.component('myResolvingErrorComponent', controller: ['error', controller], templateUrl: 'resolvingErrorTemplate.html')
+
+      RouteProvider.registerUrl '/fake_initial_url'
+      ViewBindingsProvider.bind 'viewA', {
+        templateUrl: 'viewA.html'
+        resolvingTemplateUrl: 'resolving.html'
+        resolvingErrorComponent: 'myResolvingErrorComponent'
+        resolve:
+          PromisedDependency: ($q) ->
+            deferred = $q.defer()
+            deferred.promise
+      }
+
+      return
+
+    mockTemplateRequest 'viewA.html', '<div>view A template</div>'
+    mockTemplateRequest 'resolvingErrorTemplate.html', '<div>error template</div>'
+    mockTemplateRequest 'resolving.html', '<div>resolving template</div>'
+    mockLocationSuccess()
+
+    element = createView 'viewA'
+
+    deliverResolvingTemplate()
+    triggerResolvingTemplateDelayTimeout()
+    triggerOpeningAnimationCompleteCallbacks()
+    expect(element.text()).toBe 'resolving template'
+
+    deferred.reject error
+    deliverErrorTemplate()
+
+    expect(controller).toHaveBeenCalledWith error
+    expect(element.text()).toBe 'error template'
+
+
+  it "should show the errorTemplateUrl if the view's controller throws an error when instantiated", ->
+    deferred = undefined
+
+    window.angular.mock.module (RouteProvider, ViewBindingsProvider, $compileProvider) ->
+      controller = () -> throw new Error('oopsy');
+
+      $compileProvider.component('myComponent', controller: controller, templateUrl: 'viewA.html')
+      RouteProvider.registerUrl '/fake_initial_url'
+      ViewBindingsProvider.bind 'viewA', {
+        component: 'myComponent'
+        errorTemplateUrl: 'error.html'
+      }
+
+      return
+
+    mockTemplateRequest 'viewA.html', '<div>view A template</div>'
+    mockTemplateRequest 'error.html', '<div>error template</div>'
+    mockLocationSuccess()
+
+    element = createView 'viewA'
+    triggerOpeningAnimationCompleteCallbacks()
+    deliverErrorTemplate()
+
+    expect(element.text()).toBe 'error template'
+
+  it "should show the error component if the view's controller throws an error when instantiated", ->
+    deferred = undefined
+    myErrorComponentController = jasmine.createSpy()
+    error = new Error('oopsy')
+
+    window.angular.mock.module (RouteProvider, ViewBindingsProvider, $compileProvider) ->
+      myComponentController = () -> throw error
+
+      $compileProvider.component('myComponent', controller: myComponentController, templateUrl: 'viewA.html')
+      $compileProvider.component('myErrorComponent', controller: ['error', myErrorComponentController], templateUrl: 'error.html')
+
+      RouteProvider.registerUrl '/fake_initial_url'
+      ViewBindingsProvider.bind 'viewA', {
+        component: 'myComponent'
+        errorComponent: 'myErrorComponent'
+      }
+
+      return
+
+    mockTemplateRequest 'viewA.html', '<div>view A template</div>'
+    mockTemplateRequest 'error.html', '<div>error template</div>'
+    mockLocationSuccess()
+
+    element = createView 'viewA'
+    triggerOpeningAnimationCompleteCallbacks()
+    deliverErrorTemplate()
+
+    expect(myErrorComponentController).toHaveBeenCalledWith error
     expect(element.text()).toBe 'error template'
 
   it 'increases the global pending view counter when it is created', ->

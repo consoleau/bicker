@@ -22,8 +22,8 @@ angular.module('bicker_router').directive 'view', ($log, $compile, $controller, 
       getStateDataForBinding = (binding) ->
         _.cloneDeep State.getSubset getStateFieldsFromBinding binding
 
-      getComponentFromBinding = (binding) ->
-        source = if binding.component then $injector.get(binding.component + 'Directive')[0] else binding
+      getComponentFromBinding = (binding, field = 'component') ->
+        source = if binding[field] then $injector.get(binding[field] + 'Directive')[0] else binding
         _.defaults(_.pick(source, ['controller', 'templateUrl', 'controllerAs']), { controllerAs: '$ctrl' })
 
       hasRequiredData = (binding) ->
@@ -62,7 +62,6 @@ angular.module('bicker_router').directive 'view', ($log, $compile, $controller, 
           return
 
         newState = getStateDataForBinding matchingBinding
-
         return if matchingBinding is previousBinding and angular.equals(previousBoundState, newState)
 
         previousBinding = matchingBinding
@@ -71,7 +70,6 @@ angular.module('bicker_router').directive 'view', ($log, $compile, $controller, 
         PendingViewCounter.increase()
 
         showResolvingTemplate(element, matchingBinding).then (hasResolvingTemplate) ->
-
           # @TODO: Magic number
           delayForRealTemplateInsertion = if hasResolvingTemplate then 300 else undefined
 
@@ -95,7 +93,6 @@ angular.module('bicker_router').directive 'view', ($log, $compile, $controller, 
         viewScope.$destroy()
 
       createView = (element, binding, minimumDelay) ->
-
         timeStartedMainView = Date.now()
         component = getComponentFromBinding binding
 
@@ -107,24 +104,14 @@ angular.module('bicker_router').directive 'view', ($log, $compile, $controller, 
           resolvingTemplateShownTime = Date.now() - timeStartedMainView
 
           injectMainTemplate = ->
-            dependencies = args.dependencies
-            template = args.template
-
-            element.html template
-            link = $compile element.contents()
-            viewScope = viewDirectiveScope.$new()
-
-            if component.controller
-              locals = _.merge dependencies, { $scope: viewScope, $element: element.children().eq(0) }
-
-              controller = $controller(component.controller, locals)
-              locals.$scope[component.controllerAs] = controller
-
-            link viewScope
-
-            # Wrapped in a timeout so that we can give the view time to properly initialise
-            # before potentially triggering the intialViewsLoaded event
-            $timeout -> PendingViewCounter.decrease() if not binding.manualCompletion
+            try
+              renderComponent element, component, args
+            catch e
+              showError e, element, binding
+            finally
+              # Wrapped in a timeout so that we can give the view time to properly initialise
+              # before potentially triggering the intialViewsLoaded event
+              $timeout -> PendingViewCounter.decrease() if not binding.manualCompletion
 
           mainTemplateInjectionDelay = Math.max(0, minimumDelay - resolvingTemplateShownTime)
 
@@ -138,7 +125,7 @@ angular.module('bicker_router').directive 'view', ($log, $compile, $controller, 
         onResolutionFailure = (error) ->
           $timeout -> PendingViewCounter.decrease() if not binding.manualCompletion
           $log.error error
-          showResolvingErrorTemplate element, binding
+          showResolvingError error, element, binding
 
         promises = template: $templateRequest(component.templateUrl), dependencies: resolve(binding)
         $q.all(promises).then(onSuccessfulResolution, onResolutionFailure)
@@ -153,14 +140,61 @@ angular.module('bicker_router').directive 'view', ($log, $compile, $controller, 
           element.html template
           $compile(element.contents())($rootScope.$new())
 
+      showResolvingError = (error, element, binding) ->
+        if binding.resolvingErrorTemplateUrl
+          showResolvingErrorTemplate element, binding
+        else if binding.resolvingErrorComponent
+          showErrorComponent error, element, binding, 'resolvingErrorComponent'
+
       showResolvingErrorTemplate = (element, binding) ->
-        return if not binding.resolvingErrorTemplateUrl
-        $templateRequest(binding.resolvingErrorTemplateUrl).then (template) ->
+        showBasicTemplate element, binding, 'resolvingErrorTemplateUrl'
+
+      showError = (error, element, binding) ->
+        returnValue = null
+        if binding.errorTemplateUrl
+          returnValue = showErrorTemplate element, binding
+        else if binding.errorComponent
+          returnValue = showErrorComponent error, element, binding
+
+        $timeout -> PendingViewCounter.decrease() if not binding.manualCompletion
+        return returnValue
+
+      showErrorTemplate = (element, binding) ->
+        showBasicTemplate element, binding, 'errorTemplateUrl'
+
+      showBasicTemplate = (element, binding, templateField) ->
+        return if not binding[templateField]
+        $templateRequest(binding[templateField]).then (template) ->
           element.html template
           link = $compile element.contents()
           viewScope = viewDirectiveScope.$new()
           link viewScope
 
+      showErrorComponent = (error, element, binding, bindingComponentField = 'errorComponent') ->
+        return if not binding[bindingComponentField]
+        component = getComponentFromBinding binding, bindingComponentField
+        args =
+          dependencies: error: error
+
+        $templateRequest(component.templateUrl).then (template) ->
+          args.template = template;
+          renderComponent element, component, args
+
+      renderComponent = (element, component, args) ->
+        dependencies = args.dependencies
+        template = args.template
+
+        element.html template
+        link = $compile element.contents()
+        viewScope = viewDirectiveScope.$new()
+
+        if component.controller
+          locals = _.merge dependencies, { $scope: viewScope, $element: element.children().eq(0) }
+
+          controller = $controller(component.controller, locals)
+          locals.$scope[component.controllerAs] = controller
+
+        link viewScope
 
       resolve = (binding) ->
         if not binding.resolve or Object.keys(binding.resolve).length is 0
@@ -171,7 +205,10 @@ angular.module('bicker_router').directive 'view', ($log, $compile, $controller, 
         promises = {}
 
         for dependencyName, dependencyFactory of binding.resolve
-          promises[dependencyName] = $injector.invoke dependencyFactory
+          try
+            promises[dependencyName] = $injector.invoke dependencyFactory
+          catch e
+            promises[dependencyName] = $q.reject e
 
         $q.all promises
 

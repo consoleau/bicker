@@ -23,10 +23,28 @@ angular.module('bicker_router').provider 'ViewBindings', ->
             binding.resolve = {}
           _.defaults binding.resolve, commonResolve
 
-      applycommonResolvingErrorTemplateUrl = (bindings, errorTemplateUrl) ->
+      applyCommonFields = (newBindings) ->
+        basicCommonFields = [
+          { name: 'commonResolvingErrorTemplateUrl', overrideField: 'resolvingErrorTemplateUrl' },
+          { name: 'commonResolvingErrorComponent', overrideField: 'resolvingErrorComponent' },
+          { name: 'commonErrorComponent', overrideField: 'errorComponent' },
+          { name: 'commonErrorTemplateUrl', overrideField: 'errorTemplateUrl' }
+        ]
+
+        for commonField in basicCommonFields
+          if commonField.name of config
+            defaultBindingField newBindings, commonField.overrideField, config[commonField.name]
+
+        if 'commonRequiredState' of config
+          applyCommonRequiredState newBindings, config['commonRequiredState']
+
+        if 'commonResolve' of config
+          applyCommonResolve newBindings, config['commonResolve']
+
+      defaultBindingField = (bindings, fieldName, defaultValue) ->
         for binding in newBindings
-          if not ('resolvingErrorTemplateUrl' of binding)
-            binding.resolvingErrorTemplateUrl = errorTemplateUrl
+          if not (fieldName of binding)
+            binding[fieldName] = defaultValue
 
       newBindings = []
       if 'bindings' of config
@@ -37,15 +55,7 @@ angular.module('bicker_router').provider 'ViewBindings', ->
       unless newBindings.length > 0
         throw new Error "Invalid call to ViewBindingsProvider.bind for name '#{name}'"
 
-      if 'commonRequiredState' of config
-        applyCommonRequiredState newBindings, config['commonRequiredState']
-
-      if 'commonResolve' of config
-        applyCommonResolve newBindings, config['commonResolve']
-
-      if 'commonResolvingErrorTemplateUrl' of config
-        applycommonResolvingErrorTemplateUrl newBindings, config['commonResolvingErrorTemplateUrl']
-
+      applyCommonFields newBindings
       views[name] = new View name, newBindings
 
     $get: ->
