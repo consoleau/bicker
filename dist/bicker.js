@@ -196,7 +196,7 @@
       replace: true,
       template: '<div></div>',
       link: function(viewDirectiveScope, iElement, iAttrs) {
-        var bindings, createView, destroyView, fields, getComponentFromBinding, getFieldsToWatch, getMatchingBinding, getStateDataForBinding, getStateFieldsFromBinding, getStateFieldsFromView, hasRequiredData, manageView, previousBinding, previousBoundState, resolve, showResolvingErrorTemplate, showResolvingTemplate, stripNegationPrefix, view, viewCreated, viewManagementPending, viewScope;
+        var bindings, createView, destroyView, fields, getComponentFromBinding, getFieldsToWatch, getMatchingBinding, getStateDataForBinding, getStateFieldsFromBinding, getStateFieldsFromView, hasRequiredData, manageView, previousBinding, previousBoundState, renderComponent, resolve, showBasicTemplate, showError, showErrorComponent, showErrorTemplate, showResolvingError, showResolvingErrorTemplate, showResolvingTemplate, stripNegationPrefix, view, viewCreated, viewManagementPending, viewScope;
         viewCreated = false;
         viewScope = void 0;
         viewManagementPending = false;
@@ -208,9 +208,12 @@
         getStateDataForBinding = function(binding) {
           return _.cloneDeep(State.getSubset(getStateFieldsFromBinding(binding)));
         };
-        getComponentFromBinding = function(binding) {
+        getComponentFromBinding = function(binding, field) {
           var source;
-          source = binding.component ? $injector.get(binding.component + 'Directive')[0] : binding;
+          if (field == null) {
+            field = 'component';
+          }
+          source = binding[field] ? $injector.get(binding[field] + 'Directive')[0] : binding;
           return _.defaults(_.pick(source, ['controller', 'templateUrl', 'controllerAs']), {
             controllerAs: '$ctrl'
           });
@@ -310,26 +313,19 @@
             viewCreated = true;
             resolvingTemplateShownTime = Date.now() - timeStartedMainView;
             injectMainTemplate = function() {
-              var controller, dependencies, link, locals, template;
-              dependencies = args.dependencies;
-              template = args.template;
-              element.html(template);
-              link = $compile(element.contents());
-              viewScope = viewDirectiveScope.$new();
-              if (component.controller) {
-                locals = _.merge(dependencies, {
-                  $scope: viewScope,
-                  $element: element.children().eq(0)
+              var e;
+              try {
+                return renderComponent(element, component, args);
+              } catch (_error) {
+                e = _error;
+                return showError(e, element, binding);
+              } finally {
+                $timeout(function() {
+                  if (!binding.manualCompletion) {
+                    return PendingViewCounter.decrease();
+                  }
                 });
-                controller = $controller(component.controller, locals);
-                locals.$scope[component.controllerAs] = controller;
               }
-              link(viewScope);
-              return $timeout(function() {
-                if (!binding.manualCompletion) {
-                  return PendingViewCounter.decrease();
-                }
-              });
             };
             mainTemplateInjectionDelay = Math.max(0, minimumDelay - resolvingTemplateShownTime);
             if (resolvingTemplateShownTime < minimumDelay) {
@@ -347,7 +343,7 @@
               }
             });
             $log.error(error);
-            return showResolvingErrorTemplate(element, binding);
+            return showResolvingError(error, element, binding);
           };
           promises = {
             template: $templateRequest(component.templateUrl),
@@ -367,11 +363,39 @@
             return $compile(element.contents())($rootScope.$new());
           });
         };
+        showResolvingError = function(error, element, binding) {
+          if (binding.resolvingErrorTemplateUrl) {
+            return showResolvingErrorTemplate(element, binding);
+          } else if (binding.resolvingErrorComponent) {
+            return showErrorComponent(error, element, binding, 'resolvingErrorComponent');
+          }
+        };
         showResolvingErrorTemplate = function(element, binding) {
-          if (!binding.resolvingErrorTemplateUrl) {
+          return showBasicTemplate(element, binding, 'resolvingErrorTemplateUrl');
+        };
+        showError = function(error, element, binding) {
+          var returnValue;
+          returnValue = null;
+          if (binding.errorTemplateUrl) {
+            returnValue = showErrorTemplate(element, binding);
+          } else if (binding.errorComponent) {
+            returnValue = showErrorComponent(error, element, binding);
+          }
+          $timeout(function() {
+            if (!binding.manualCompletion) {
+              return PendingViewCounter.decrease();
+            }
+          });
+          return returnValue;
+        };
+        showErrorTemplate = function(element, binding) {
+          return showBasicTemplate(element, binding, 'errorTemplateUrl');
+        };
+        showBasicTemplate = function(element, binding, templateField) {
+          if (!binding[templateField]) {
             return;
           }
-          return $templateRequest(binding.resolvingErrorTemplateUrl).then(function(template) {
+          return $templateRequest(binding[templateField]).then(function(template) {
             var link;
             element.html(template);
             link = $compile(element.contents());
@@ -379,8 +403,44 @@
             return link(viewScope);
           });
         };
+        showErrorComponent = function(error, element, binding, bindingComponentField) {
+          var args, component;
+          if (bindingComponentField == null) {
+            bindingComponentField = 'errorComponent';
+          }
+          if (!binding[bindingComponentField]) {
+            return;
+          }
+          component = getComponentFromBinding(binding, bindingComponentField);
+          args = {
+            dependencies: {
+              error: error
+            }
+          };
+          return $templateRequest(component.templateUrl).then(function(template) {
+            args.template = template;
+            return renderComponent(element, component, args);
+          });
+        };
+        renderComponent = function(element, component, args) {
+          var controller, dependencies, link, locals, template;
+          dependencies = args.dependencies;
+          template = args.template;
+          element.html(template);
+          link = $compile(element.contents());
+          viewScope = viewDirectiveScope.$new();
+          if (component.controller) {
+            locals = _.merge(dependencies, {
+              $scope: viewScope,
+              $element: element.children().eq(0)
+            });
+            controller = $controller(component.controller, locals);
+            locals.$scope[component.controllerAs] = controller;
+          }
+          return link(viewScope);
+        };
         resolve = function(binding) {
-          var deferred, dependencyFactory, dependencyName, promises, ref;
+          var deferred, dependencyFactory, dependencyName, e, promises, ref;
           if (!binding.resolve || Object.keys(binding.resolve).length === 0) {
             deferred = $q.defer();
             deferred.resolve({});
@@ -390,7 +450,12 @@
           ref = binding.resolve;
           for (dependencyName in ref) {
             dependencyFactory = ref[dependencyName];
-            promises[dependencyName] = $injector.invoke(dependencyFactory);
+            try {
+              promises[dependencyName] = $injector.invoke(dependencyFactory);
+            } catch (_error) {
+              e = _error;
+              promises[dependencyName] = $q.reject(e);
+            }
           }
           return $q.all(promises);
         };
@@ -879,6 +944,14 @@
     provider.registerType('any', {
       regex: /.+/
     });
+    provider.registerType('list', {
+      regex: /.+/,
+      parser: [
+        'token', function(token) {
+          return token.split(',');
+        }
+      ]
+    });
     return provider;
   }]);
 
@@ -919,7 +992,7 @@
     })();
     return provider = {
       bind: function(name, config) {
-        var applyCommonRequiredState, applyCommonResolve, applycommonResolvingErrorTemplateUrl, newBindings;
+        var applyCommonFields, applyCommonRequiredState, applyCommonResolve, defaultBindingField, newBindings;
         applyCommonRequiredState = function(bindings, commonRequiredState) {
           var binding, i, len, results;
           results = [];
@@ -944,13 +1017,43 @@
           }
           return results;
         };
-        applycommonResolvingErrorTemplateUrl = function(bindings, errorTemplateUrl) {
+        applyCommonFields = function(newBindings) {
+          var basicCommonFields, commonField, i, len;
+          basicCommonFields = [
+            {
+              name: 'commonResolvingErrorTemplateUrl',
+              overrideField: 'resolvingErrorTemplateUrl'
+            }, {
+              name: 'commonResolvingErrorComponent',
+              overrideField: 'resolvingErrorComponent'
+            }, {
+              name: 'commonErrorComponent',
+              overrideField: 'errorComponent'
+            }, {
+              name: 'commonErrorTemplateUrl',
+              overrideField: 'errorTemplateUrl'
+            }
+          ];
+          for (i = 0, len = basicCommonFields.length; i < len; i++) {
+            commonField = basicCommonFields[i];
+            if (commonField.name in config) {
+              defaultBindingField(newBindings, commonField.overrideField, config[commonField.name]);
+            }
+          }
+          if ('commonRequiredState' in config) {
+            applyCommonRequiredState(newBindings, config['commonRequiredState']);
+          }
+          if ('commonResolve' in config) {
+            return applyCommonResolve(newBindings, config['commonResolve']);
+          }
+        };
+        defaultBindingField = function(bindings, fieldName, defaultValue) {
           var binding, i, len, results;
           results = [];
           for (i = 0, len = newBindings.length; i < len; i++) {
             binding = newBindings[i];
-            if (!('resolvingErrorTemplateUrl' in binding)) {
-              results.push(binding.resolvingErrorTemplateUrl = errorTemplateUrl);
+            if (!(fieldName in binding)) {
+              results.push(binding[fieldName] = defaultValue);
             } else {
               results.push(void 0);
             }
@@ -966,15 +1069,7 @@
         if (!(newBindings.length > 0)) {
           throw new Error("Invalid call to ViewBindingsProvider.bind for name '" + name + "'");
         }
-        if ('commonRequiredState' in config) {
-          applyCommonRequiredState(newBindings, config['commonRequiredState']);
-        }
-        if ('commonResolve' in config) {
-          applyCommonResolve(newBindings, config['commonResolve']);
-        }
-        if ('commonResolvingErrorTemplateUrl' in config) {
-          applycommonResolvingErrorTemplateUrl(newBindings, config['commonResolvingErrorTemplateUrl']);
-        }
+        applyCommonFields(newBindings);
         return views[name] = new View(name, newBindings);
       },
       $get: function() {
