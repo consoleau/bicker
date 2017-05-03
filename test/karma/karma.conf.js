@@ -5,34 +5,22 @@ module.exports = function (config) {
   config.set({
 
     plugins: [
-      'karma-coffee-preprocessor',
       'karma-jasmine',
       'karma-chrome-launcher',
-      'karma-ng-scenario'
+      'karma-ng-scenario',
+      'karma-spec-reporter',
+      'karma-browserify'
     ],
-
-    preprocessors: {
-      '../../src/**/*.coffee': ['coffee'],
-      '**/*.coffee': ['coffee']
-    },
-
-    coffeePreprocessor: {
-      // options passed to the coffee compiler
-      options: {
-        bare: true,
-        sourceMap: false
-      },
-      // transforming the filenames
-      transformPath: function(path) {
-        return path.replace(/\.coffee$/, '.js');
-      }
-    },
 
     // base path, that will be used to resolve files and exclude
     basePath: '',
 
     // testing framework to use (jasmine/mocha/qunit/...)
-    frameworks: ['jasmine'],
+    frameworks: ['browserify', 'jasmine'],
+
+    preprocessors: {
+      '../../src/**/*.js': ['browserify']
+    },
 
     // list of files / patterns to load in the browser
     files: [
@@ -41,10 +29,19 @@ module.exports = function (config) {
       '../../bower_components/angular-animate/angular-animate.min.js',
       '../../bower_components/angular-mocks/angular-mocks.js',
       '../../bower_components/lodash/lodash.js',
-      '../../src/router.coffee',
-      '../../src/**/*.coffee',
-      '**/*.coffee'
+      '../../src/router.js',
+      '../../src/constants/*.js',
+      '../../src/factories/*.js',
+      '../../src/providers/*.js',
+      '../../src/directives/*.js',
+      '../../test/karma/**/*.js'
     ],
+
+    browserify: {
+      paths: ['../../src'],
+      debug: true,
+      transform: [["babelify", {"presets": ["es2015"]}]]
+    },
 
     // list of files / patterns to exclude
     // exclude: ['app/.tmp/spec/cukes/**','app/.tmp/spec/e2e/**', 'app/.tmp/spec/pages/**'],
@@ -54,12 +51,14 @@ module.exports = function (config) {
 
     // level of logging
     // possible values: LOG_DISABLE || LOG_ERROR || LOG_WARN || LOG_INFO || LOG_DEBUG
-    logLevel: config.LOG_DEBUG,
+    logLevel: config.LOG_INFO,
 
     // enable / disable watching file and executing tests whenever any file changes
     autoWatch: false,
 
     browsers: ['Chrome'],
+
+    reporters: ['spec'],
 
     // Continuous Integration mode
     // if true, it capture browsers, run tests and exit

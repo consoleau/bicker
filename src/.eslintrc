@@ -1,0 +1,28 @@
+{
+  "env": {
+    "browser": true,
+    "node": true,
+    "mocha": true,
+    "es6": true
+  },
+  "globals": {
+    "angular": false,
+    "Decimal": false,
+    "_": false,
+    "moment": false,
+    "jQuery": false,
+    "$": false
+  },
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module"
+  },
+  "rules": {
+    "no-console": ["error", { "allow": ["warn", "error"] }],
+    "console-saas-rules/component-defined-inline": "error",
+    "console-saas-rules/exporting-angular-module": "error",
+    "console-saas-rules/ngInject-angular-classes": "error",
+    "console-saas-rules/ngInject-resolve-objects": "error",
+    "console-saas-rules/preserve-di-assignment-case": "error"
+  }
+}
