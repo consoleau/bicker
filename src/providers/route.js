@@ -1,11 +1,11 @@
 angular.module('bicker_router').provider('Route', function(ObjectHelper) {
   "ngInject";
-  let tokens = {};
-  let urlWriters = [];
-  let urls = [];
-  let persistentStates = [];
-  let ready = false;
-  let types = {};
+  const tokens = {};
+  const urlWriters = [];
+  const urls = [];
+  const persistentStates = [];
+  const ready = false;
+  const types = {};
   let html5Mode = false;
 
   const provider = {
@@ -27,7 +27,7 @@ angular.module('bicker_router').provider('Route', function(ObjectHelper) {
     },
 
     registerUrl(pattern, config = {}) {
-      let urlData = {
+      const urlData = {
         compiledUrl: this._compileUrlPattern(pattern, config),
         pattern
       };
@@ -50,28 +50,27 @@ angular.module('bicker_router').provider('Route', function(ObjectHelper) {
 
     _compileUrlPattern(urlPattern, config) {
       let match;
-      let compiledUrl;
       urlPattern = this._escapeRegexSpecialCharacters(urlPattern);
       urlPattern = this._ensureOptionalTrailingSlash(urlPattern);
 
-      let tokenRegex = /\{([A-Za-z\._0-9]+)\}/g;
+      const tokenRegex = /\{([A-Za-z\._0-9]+)\}/g;
       let urlRegex = urlPattern;
 
       if (!config.partialMatch) {
         urlRegex = `^${urlRegex}$`;
       }
 
-      let tokenList = [];
+      const tokenList = [];
 
       while ((match = tokenRegex.exec(urlPattern)) !== null) {
-        let token = tokens[match[1]];
+        const token = tokens[match[1]];
         tokenList.push(token);
         urlRegex = urlRegex.replace(match[0], `(${types[token.type].regex.source})`);
       }
 
       urlRegex.replace('.', '\\.');
 
-      return compiledUrl = {
+      return {
         regex: new RegExp(urlRegex, 'i'),
         tokens: tokenList
       };
@@ -81,7 +80,7 @@ angular.module('bicker_router').provider('Route', function(ObjectHelper) {
       if (str.match(/\/$/)) {
         return str.replace(/\/$/, '/?');
       }
-      return str + '/?';
+      return `${str}/?`;
     },
 
     _escapeRegexSpecialCharacters(str) {
@@ -99,8 +98,8 @@ angular.module('bicker_router').provider('Route', function(ObjectHelper) {
 
       _.forIn(urlWriters, (writer, writerName) =>
         urlWriters[writerName] = function(data) {
-          if (data == null) { data = {}; }
-          let locals = {UrlData: data};
+          if (!data) { data = {}; }
+          const locals = {UrlData: data};
           return $injector.invoke(writer, {}, locals);
         }
       );
@@ -111,7 +110,7 @@ angular.module('bicker_router').provider('Route', function(ObjectHelper) {
         readyDeferred: $q.defer(),
 
         match(urlToMatch) {
-          for (let url of Array.from(urls)) {
+          for (const url of Array.from(urls)) {
             let match;
             if ((match = url.compiledUrl.regex.exec(urlToMatch)) !== null) {
               return {url, regexMatch: match};
@@ -121,51 +120,44 @@ angular.module('bicker_router').provider('Route', function(ObjectHelper) {
         },
 
         extractData(match, searchData = undefined) {
-          let defaults = this.extractDefaultData(match);
-          let path = this.extractPathData(match);
+          const defaults = this.extractDefaultData(match);
+          const path = this.extractPathData(match);
           searchData = this.extractSearchData(searchData);
           return ObjectHelper.default(searchData, path, defaults);
         },
 
         extractSearchData(searchData) {
           if (!searchData) { searchData = $location.search(); }
-          let data = _.clone(searchData);
-          let newData = {};
+          const data = _.clone(searchData);
+          const newData = {};
 
-          for (let key in data) {
-            let value = data[key];
+          _.forEach(data, (value, key) => {
             let targetKey = _.findKey(tokens, { searchAlias: key });
-            if (targetKey == null) { targetKey = key; }
+            if (!targetKey) { targetKey = key; }
 
             const tokenTypeName = tokens[targetKey] ? _.get(tokens[targetKey], 'type') : undefined;
             if (!tokens[targetKey] || (types[tokenTypeName].regex.test(value))) {
 
-              //TODO: refactor this code not to use __guard__ (attempt below)
-              function __guard__(value, transform) {
-                return (typeof value !== 'undefined' && value !== null) ? transform(value) : undefined;
-              }
-              if (__guard__(types[tokens[targetKey] != null ? tokens[targetKey].type : undefined], x1 => x1.parser)) {
-                value = $injector.invoke(types[tokens[targetKey].type] != null ? types[tokens[targetKey].type].parser : undefined, null, {token: value});
-              }
-              // const tokenType = _.get(tokens, '[targetKey].type');
-              // if (tokenType && tokenType.parser) {
-              //   const thisToken = this.types[transform(tokenType.parser)];
-              //   if (thisToken) {
-              //     value = $injector.invoke(thisToken.parser, null, {token: value});
-              //   }
-              // }
+              const tokenType = tokens[targetKey] ? tokens[targetKey].type : undefined;
+              const typeTokenType = tokenType ? types[tokenType] : undefined;
+              const tokenTypeParsed = typeTokenType ? typeTokenType.parser : undefined;
 
-              let dataKey = (tokens[targetKey] != null ? tokens[targetKey].statePath : undefined) || targetKey;
+              if (tokenTypeParsed) {
+                value = $injector.invoke(tokenTypeParsed, null, {token: value});
+              }
+
+              const tokenTargetKeyStatePath = tokens[targetKey] ? tokens[targetKey].statePath : undefined;
+              const dataKey = tokenTargetKeyStatePath || targetKey;
 
               ObjectHelper.set(newData, dataKey, value);
             }
-          }
+          });
 
           return newData;
         },
 
         extractDefaultData(match) {
-          let data = {};
+          const data = {};
 
           _.forEach(match.url.state, (value, key) => {
             ObjectHelper.set(data, key, (typeof value === 'object' ? _.cloneDeep(value) : value));
@@ -175,13 +167,13 @@ angular.module('bicker_router').provider('Route', function(ObjectHelper) {
         },
 
         extractPathData(match) {
-          let data = {};
-          let pathTokens = match.url.compiledUrl.tokens;
+          const data = {};
+          const pathTokens = match.url.compiledUrl.tokens;
 
           if (pathTokens.length === 0) { return {}; }
 
           for (let n = 0, end = pathTokens.length-1, asc = 0 <= end; asc ? n <= end : n >= end; asc ? n++ : n--) {
-            let token = match.url.compiledUrl.tokens[n];
+            const token = match.url.compiledUrl.tokens[n];
             let value = match.regexMatch[n+1];
 
             if (types[token.type].parser) { value = $injector.invoke(types[token.type].parser, null, {token: value}); }

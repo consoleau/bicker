@@ -30,7 +30,7 @@ describe('View directive', function() {
         triggerOpeningAnimationCompleteCallbacks();
 
         $rootScope.$digest(); // resolve the empty resolving template promise
-        return $httpBackend.verifyNoOutstandingRequest();
+        $httpBackend.verifyNoOutstandingRequest();
       });
 
       expect(controller).not.toHaveBeenCalled();
@@ -277,11 +277,12 @@ describe('View directive', function() {
     });
   });
 
-  /*
   it('results in $element $destroy event being triggered when the view binding is removed', function() {
     let destroyCalledCounter = 0;
 
-    let controller = $element => $element.$on('$destroy', () => destroyCalledCounter += 1);
+    function controller($element) {
+      $element.$on('$destroy', () => destroyCalledCounter += 1);
+    }
 
     window.angular.mock.module(function(RouteProvider, ViewBindingsProvider, $controllerProvider) {
       RouteProvider.registerUrl('/fake_initial_url');
@@ -292,7 +293,6 @@ describe('View directive', function() {
         templateUrl: 'stateVariationA.html',
         requiredState: ['stateField']
       });
-
     });
 
     mockTemplateRequest('stateVariationA.html', '<div id="contents"></div>');
@@ -312,7 +312,6 @@ describe('View directive', function() {
       expect(destroyCalledCounter).toBe(1);
     });
   });
-  */
 
   it('will switch between different bindings for the same view when watched/required state changes', function() {
     const stateAController = jasmine.createSpy('stateAController');

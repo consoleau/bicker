@@ -157,7 +157,7 @@ describe('Router', function() {
 
       let handler = function(event, data) {
         data.unsetting = unsetting;
-        return data.setting = setting;
+        data.setting = setting;
       };
 
       spyOn($location, 'path').and.returnValue(url);

@@ -169,7 +169,7 @@ describe('ViewBindings', function() {
         window.angular.mock.module(ViewBindingsProvider => ViewBindingsProvider.bind('name1', []));
 
         inject(function (ViewBindings) {
-          return ViewBindings.getView('name1');
+          ViewBindings.getView('name1');
         });
       };
 

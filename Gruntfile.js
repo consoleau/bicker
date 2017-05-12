@@ -87,10 +87,6 @@ grunt.initConfig({
         dest: 'examples/lib/bicker.js'
       }]
     }
-  },
-
-  eslint: {
-    target: ['.']
   }
 });
 

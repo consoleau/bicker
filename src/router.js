@@ -1,21 +1,24 @@
-angular.module('bicker_router', ['ngAnimate']).run(function(State, Route, $location, $rootScope, ObjectHelper, PendingViewCounter) {
+angular.module('bicker_router', ['ngAnimate']).run(function (State, Route, $location, $rootScope, ObjectHelper, PendingViewCounter) {
   "ngInject";
+
   let oldUrl = undefined;
-  $rootScope.$on('$locationChangeStart', function() {
+  $rootScope.$on('$locationChangeStart', function () {
     if (Route.isReady()) {
-    	Route.setReady(false);
+      Route.setReady(false);
     }
   });
 
-  $rootScope.$on('$locationChangeSuccess', function(e, newUrl) {
+  $rootScope.$on('$locationChangeSuccess', function (e, newUrl) {
     // Work-around for AngularJS issue https://github.com/angular/angular.js/issues/8368
     let data;
-    if (newUrl === oldUrl) { return; }
+    if (newUrl === oldUrl) {
+      return;
+    }
 
     oldUrl = newUrl;
 
     PendingViewCounter.reset();
-    let match = Route.match($location.path());
+    const match = Route.match($location.path());
 
     if (!match) {
       data = {};
@@ -26,7 +29,7 @@ angular.module('bicker_router', ['ngAnimate']).run(function(State, Route, $locat
     let fieldsToUnset = ObjectHelper.notIn(State.list, data);
     fieldsToUnset = _.difference(fieldsToUnset, Route.getPersistentStates().concat(Route.getFlashStates()));
 
-    let eventData = {unsetting: fieldsToUnset, setting: data};
+    const eventData = {unsetting: fieldsToUnset, setting: data};
 
     $rootScope.$emit('bicker_router.beforeStateChange', eventData);
 
