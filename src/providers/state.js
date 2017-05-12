@@ -1,5 +1,6 @@
 class StateProvider {
   $get(WatchableListFactory) {
+    'ngInject';
     return WatchableListFactory.create();
   }
 }

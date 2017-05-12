@@ -92,6 +92,7 @@ angular.module('bicker_router').provider('Route', function(ObjectHelper) {
     },
 
     $get($location, State, $injector, $q) {
+      'ngInject';
 
       // When getting a new instance of the service (only done once), we need to iterate over the urlWriters and turn
       // them into methods that invoke the REAL urlWriter, but providing dependency injection to it, while also
