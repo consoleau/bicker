@@ -34,10 +34,9 @@ angular.module('bicker_router', ['ngAnimate']).run(function(State, Route, $locat
       State.unset(eventData.unsetting);
     }
 
-    for (let key in eventData.setting) {
-      let value = eventData.setting[key];
+    _.forEach(eventData.setting, (value, key) => {
       State.set(key, value);
-    }
+    });
 
     Route.resetFlashStates();
     Route.setReady(true);

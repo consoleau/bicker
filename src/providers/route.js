@@ -1,14 +1,14 @@
 angular.module('bicker_router').provider('Route', function(ObjectHelper) {
   "ngInject";
   let tokens = {};
-  let urlWriters = {};
+  let urlWriters = [];
   let urls = [];
   let persistentStates = [];
   let ready = false;
   let types = {};
   let html5Mode = false;
 
-  let provider = {
+  const provider = {
 
     registerType(name, config) {
       types[name] = config;
@@ -26,8 +26,7 @@ angular.module('bicker_router').provider('Route', function(ObjectHelper) {
       return _.extend({ and: this.registerUrlWriter }, this);
     },
 
-    registerUrl(pattern, config) {
-      if (config == null) { config = {}; }
+    registerUrl(pattern, config = {}) {
       let urlData = {
         compiledUrl: this._compileUrlPattern(pattern, config),
         pattern
@@ -38,18 +37,16 @@ angular.module('bicker_router').provider('Route', function(ObjectHelper) {
     },
 
     setPersistentStates(...stateList) {
-      return (() => {
-        let result = [];
-        for (let state of Array.from(stateList)) {
-          let item;
-          if (!Array.from(persistentStates).includes(state)) { item = persistentStates.push(state); }
-          result.push(item);
+      _.forEach(stateList, (state) => {
+        if (!persistentStates.includes(state)) {
+          persistentStates.push(state);
         }
-        return result;
-      })();
+      });
     },
 
-    setHtml5Mode(mode) { return html5Mode = mode; },
+    setHtml5Mode(mode) {
+      html5Mode = mode;
+    },
 
     _compileUrlPattern(urlPattern, config) {
       let match;
@@ -91,7 +88,7 @@ angular.module('bicker_router').provider('Route', function(ObjectHelper) {
       return str.replace(/[\-\[\]\/\(\)\*\+\?\\\^\$\|]/g, "\\$&");
     },
 
-    $get($location, State, $injector, $q) {
+    $get($location, $injector, $q) {
       'ngInject';
 
       // When getting a new instance of the service (only done once), we need to iterate over the urlWriters and turn
@@ -110,12 +107,12 @@ angular.module('bicker_router').provider('Route', function(ObjectHelper) {
 
       let flashStates = [];
 
-      let service = {
+      const service = {
         readyDeferred: $q.defer(),
 
         match(urlToMatch) {
           for (let url of Array.from(urls)) {
-            var match;
+            let match;
             if ((match = url.compiledUrl.regex.exec(urlToMatch)) !== null) {
               return {url, regexMatch: match};
             }
@@ -123,8 +120,7 @@ angular.module('bicker_router').provider('Route', function(ObjectHelper) {
           return null;
         },
 
-        extractData(match, searchData) {
-          if (searchData == null) { searchData = undefined; }
+        extractData(match, searchData = undefined) {
           let defaults = this.extractDefaultData(match);
           let path = this.extractPathData(match);
           searchData = this.extractSearchData(searchData);
@@ -132,20 +128,32 @@ angular.module('bicker_router').provider('Route', function(ObjectHelper) {
         },
 
         extractSearchData(searchData) {
-          if (searchData == null) { searchData = $location.search(); }
+          if (!searchData) { searchData = $location.search(); }
           let data = _.clone(searchData);
           let newData = {};
 
           for (let key in data) {
-            var value = data[key];
+            let value = data[key];
             let targetKey = _.findKey(tokens, { searchAlias: key });
             if (targetKey == null) { targetKey = key; }
 
-            if (!tokens[targetKey] || __guard__(types[tokens[targetKey] != null ? tokens[targetKey].type : undefined], x => x.regex.test(value))) {
+            const tokenTypeName = tokens[targetKey] ? _.get(tokens[targetKey], 'type') : undefined;
+            if (!tokens[targetKey] || (types[tokenTypeName].regex.test(value))) {
 
+              //TODO: refactor this code not to use __guard__ (attempt below)
+              function __guard__(value, transform) {
+                return (typeof value !== 'undefined' && value !== null) ? transform(value) : undefined;
+              }
               if (__guard__(types[tokens[targetKey] != null ? tokens[targetKey].type : undefined], x1 => x1.parser)) {
                 value = $injector.invoke(types[tokens[targetKey].type] != null ? types[tokens[targetKey].type].parser : undefined, null, {token: value});
               }
+              // const tokenType = _.get(tokens, '[targetKey].type');
+              // if (tokenType && tokenType.parser) {
+              //   const thisToken = this.types[transform(tokenType.parser)];
+              //   if (thisToken) {
+              //     value = $injector.invoke(thisToken.parser, null, {token: value});
+              //   }
+              // }
 
               let dataKey = (tokens[targetKey] != null ? tokens[targetKey].statePath : undefined) || targetKey;
 
@@ -159,10 +167,9 @@ angular.module('bicker_router').provider('Route', function(ObjectHelper) {
         extractDefaultData(match) {
           let data = {};
 
-          for (let key in match.url.state) {
-            let value = match.url.state[key];
+          _.forEach(match.url.state, (value, key) => {
             ObjectHelper.set(data, key, (typeof value === 'object' ? _.cloneDeep(value) : value));
-          }
+          });
 
           return data;
         },
@@ -185,24 +192,32 @@ angular.module('bicker_router').provider('Route', function(ObjectHelper) {
           return data;
         },
 
-        getUrlWriters() { return urlWriters; },
+        getUrlWriters() {
+          return urlWriters;
+        },
 
-        getUrlWriter(name) { return urlWriters[name]; },
+        getUrlWriter(name) {
+          return urlWriters[name];
+        },
 
-        invokeUrlWriter(name, data) { if (data == null) { data = {}; } return urlWriters[name](data); },
+        invokeUrlWriter(name, data = {}) {
+          return urlWriters[name](data);
+        },
 
-        go(name, data) { if (data == null) { data = {}; } return $location.url(this.invokeUrlWriter(name, data)); },
+        go(name, data = {}) {
+          return $location.url(this.invokeUrlWriter(name, data));
+        },
 
         getPersistentStates() {
           return persistentStates;
         },
 
         resetFlashStates() {
-          return flashStates = [];
+          flashStates = [];
         },
 
         addFlashStates(...newStates) {
-          return flashStates = flashStates.concat(newStates);
+          flashStates = flashStates.concat(newStates);
         },
 
         getFlashStates() {
@@ -215,13 +230,16 @@ angular.module('bicker_router').provider('Route', function(ObjectHelper) {
           } else {
             this.readyDeferred.resolve();
           }
-
-          return this.ready = ready;
+          return ready;
         },
 
-        isReady() { return this.ready; },
+        isReady() {
+          return ready;
+        },
 
-        isHtml5ModeEnabled() { return html5Mode; },
+        isHtml5ModeEnabled() {
+          return html5Mode;
+        },
 
         whenReady() {
           return this.readyDeferred.promise;
@@ -239,7 +257,3 @@ angular.module('bicker_router').provider('Route', function(ObjectHelper) {
 
   return provider;
 });
-
-function __guard__(value, transform) {
-  return (typeof value !== 'undefined' && value !== null) ? transform(value) : undefined;
-}
