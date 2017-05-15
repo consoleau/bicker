@@ -21,8 +21,8 @@ describe('ObjectHelper', function() {
       ObjectHelper.set(object, 'a.b.b1', b1);
       ObjectHelper.set(object, 'a.b.b2', b2);
 
-      expect(ObjectHelper.get(object, 'a.b')).toEqual(jasmine.objectContaining({b1, b2}));
-      expect(ObjectHelper.get(object, 'a.b.b1.c')).toEqual(b1.c);
+      expect(ObjectHelper.get(object, 'a.b'), 'object should contain a.b').toEqual(jasmine.objectContaining({b1, b2}));
+      expect(ObjectHelper.get(object, 'a.b.b1.c'), 'object should contain a.b.b1.c').toEqual(b1.c);
     });
   });
 
@@ -40,9 +40,9 @@ describe('ObjectHelper', function() {
       inject(function (ObjectHelper) {
         const object = {};
         ObjectHelper.set(object, 'a.b.c', true);
-        expect(ObjectHelper.unset(object, 'a.b.c.d')).toBe(false);
-        expect(ObjectHelper.unset(object, 'a.b.c')).toBe(true);
-        expect(object.a.b.c).toBeUndefined();
+        expect(ObjectHelper.unset(object, 'a.b.c.d'), 'should unset object > a.b.c.d').toBe(false);
+        expect(ObjectHelper.unset(object, 'a.b.c'), 'should unset object > a.b.c').toBe(true);
+        expect(object.a.b.c, 'object > a.b.c should be undefined').toBeUndefined();
       });
     });
   });

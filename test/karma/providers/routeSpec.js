@@ -21,18 +21,18 @@ describe('Route', function() {
         it('should match against a single digit', function () {
           inject(function (Route) {
             let result = Route.match('/1');
-            expect(result.url.pattern).toEqual(urlDefinition);
-            expect(result.url.compiledUrl.tokens).toBeInstanceOf(Object);
-            expect(result.regexMatch).toBeInstanceOf(Object);
+            expect(result.url.pattern, 'url.pattern').toEqual(urlDefinition);
+            expect(result.url.compiledUrl.tokens, 'compiledUrl.tokens').toBeInstanceOf(Object);
+            expect(result.regexMatch, 'regexMatch').toBeInstanceOf(Object);
           });
         });
 
         it('should match against a sequence of digits', function () {
           inject(function (Route) {
             let result = Route.match('/234');
-            expect(result.url.pattern).toEqual(urlDefinition);
-            expect(result.url.compiledUrl.tokens).toBeInstanceOf(Object);
-            expect(result.regexMatch).toBeInstanceOf(Object);
+            expect(result.url.pattern, 'url.pattern').toEqual(urlDefinition);
+            expect(result.url.compiledUrl.tokens, 'compiledUrl.tokens').toBeInstanceOf(Object);
+            expect(result.regexMatch, 'regexMatch').toBeInstanceOf(Object);
           });
         });
 
@@ -59,18 +59,18 @@ describe('Route', function() {
         it('should match against a letter', function () {
           inject(function (Route) {
             let result = Route.match('/a');
-            expect(result.url.pattern).toEqual(urlDefinition);
-            expect(result.url.compiledUrl.tokens).toBeInstanceOf(Object);
-            expect(result.regexMatch).toBeInstanceOf(Object);
+            expect(result.url.pattern, 'url.pattern').toEqual(urlDefinition);
+            expect(result.url.compiledUrl.tokens, 'compiledUrl.tokens').toBeInstanceOf(Object);
+            expect(result.regexMatch, 'regexMatch').toBeInstanceOf(Object);
           });
         });
 
         it('should match against a sequence of letters', function () {
           inject(function (Route) {
             let result = Route.match('/abCDefg');
-            expect(result.url.pattern).toEqual(urlDefinition);
-            expect(result.url.compiledUrl.tokens).toBeInstanceOf(Object);
-            expect(result.regexMatch).toBeInstanceOf(Object);
+            expect(result.url.pattern, 'url.pattern').toEqual(urlDefinition);
+            expect(result.url.compiledUrl.tokens, 'compiledUrl.tokens').toBeInstanceOf(Object);
+            expect(result.regexMatch, 'regexMatch').toBeInstanceOf(Object);
           });
         });
 
@@ -97,10 +97,10 @@ describe('Route', function() {
         it('should match against provided regex', function () {
           inject(function (Route) {
             let result = Route.match('/volkswagen');
-            expect(result.url.pattern).toEqual(urlDefinition);
-            expect(result.url.compiledUrl.tokens).toBeInstanceOf(Object);
-            expect(result.regexMatch).toBeInstanceOf(Object);
-            expect(Route.match('/ford')).toBe(null);
+            expect(result.url.pattern, 'url.pattern').toEqual(urlDefinition);
+            expect(result.url.compiledUrl.tokens, 'compiledUrl.tokens').toBeInstanceOf(Object);
+            expect(result.regexMatch, 'regexMatch').toBeInstanceOf(Object);
+            expect(Route.match('/ford'), 'Route.match("/ford")').toBe(null);
           });
         });
       });
@@ -122,9 +122,9 @@ describe('Route', function() {
         it('should match against a non-empty value', function () {
           inject(function (Route) {
             let result = Route.match('/something/abc/something');
-            expect(result.url.pattern).toEqual(urlDefinition);
-            expect(result.url.compiledUrl.tokens).toBeInstanceOf(Object);
-            expect(result.regexMatch).toBeInstanceOf(Object);
+            expect(result.url.pattern, 'url.pattern').toEqual(urlDefinition);
+            expect(result.url.compiledUrl.tokens, 'compiledUrl.tokens').toBeInstanceOf(Object);
+            expect(result.regexMatch, 'regexMatch').toBeInstanceOf(Object);
           });
         });
       });
@@ -143,9 +143,9 @@ describe('Route', function() {
           it('should match against a URL with a single value in the specified location', function () {
             inject(function (Route) {
               let result = Route.match('/something/abc/something');
-              expect(result.url.pattern).toEqual(urlDefinition);
-              expect(result.url.compiledUrl.tokens).toBeInstanceOf(Object);
-              expect(result.regexMatch).toBeInstanceOf(Object);
+              expect(result.url.pattern, 'url.pattern').toEqual(urlDefinition);
+              expect(result.url.compiledUrl.tokens, 'compiledUrl.tokens').toBeInstanceOf(Object);
+              expect(result.regexMatch, 'regexMatch').toBeInstanceOf(Object);
             });
           });
 
@@ -161,9 +161,9 @@ describe('Route', function() {
           it('should match against a URL with multiple values separated by a comma in the specified location', function () {
             inject(function (Route) {
               let result = Route.match('/something/a,b,c/something');
-              expect(result.url.pattern).toEqual(urlDefinition);
-              expect(result.url.compiledUrl.tokens).toBeInstanceOf(Object);
-              expect(result.regexMatch).toBeInstanceOf(Object);
+              expect(result.url.pattern, 'url.pattern').toEqual(urlDefinition);
+              expect(result.url.compiledUrl.tokens, 'compiledUrl.tokens').toBeInstanceOf(Object);
+              expect(result.regexMatch, 'regexMatch').toBeInstanceOf(Object);
             });
           });
 
@@ -206,9 +206,9 @@ describe('Route', function() {
 
       inject(function(Route) {
         let result = Route.match('/1/b/c');
-        expect(result.url.pattern).toEqual(urlDefinition);
-        expect(result.url.compiledUrl.tokens).toBeInstanceOf(Object);
-        expect(result.regexMatch).toBeInstanceOf(Object);
+        expect(result.url.pattern, 'url.pattern').toEqual(urlDefinition);
+        expect(result.url.compiledUrl.tokens, 'compiledUrl.tokens').toBeInstanceOf(Object);
+        expect(result.regexMatch, 'regexMatch').toBeInstanceOf(Object);
       });
     });
 
@@ -252,8 +252,8 @@ describe('Route', function() {
         RouteProvider.registerUrl('/a/b/c', {partialMatch: true});
       });
       inject(function(Route) {
-        expect(Route.match('/x/a/b/c/')).not.toBeNull();
-        expect(Route.match('/a/b/c/x')).not.toBeNull();
+        expect(Route.match('/x/a/b/c/'), 'Route.match("/x/a/b/c/")').not.toBeNull();
+        expect(Route.match('/a/b/c/x'), 'Route.match("/a/b/c/x")').not.toBeNull();
       });
     });
   });
@@ -295,8 +295,8 @@ describe('Route', function() {
       inject(function(Route) {
         let match = Route.match('/1/b/c');
         let data = Route.extractData(match);
-        expect(data.tokenA).toBe(1);
-        expect(data.tokenB).toBe('b');
+        expect(data.tokenA, 'tokenA').toBe(1);
+        expect(data.tokenB, 'tokenB').toBe('b');
       });
     });
 
@@ -311,8 +311,8 @@ describe('Route', function() {
       inject(function(Route) {
         let match = Route.match('/1/b/c');
         let data = Route.extractData(match);
-        expect(data.tokenA).toBe(1);
-        expect(data.tokenB).toBe('b!!!');
+        expect(data.tokenA, 'tokenA').toBe(1);
+        expect(data.tokenB, 'tokenB').toBe('b!!!');
       });
     });
 
@@ -326,8 +326,8 @@ describe('Route', function() {
       inject(function(Route) {
         let match = Route.match('/1/b/c');
         let data = Route.extractData(match);
-        expect(data.tokenA).toBe(1);
-        expect(data.somewhere.else).toBe('b');
+        expect(data.tokenA, 'tokenA').toBe(1);
+        expect(data.somewhere.else, 'somewhere.else').toBe('b');
       });
     });
   });
@@ -439,13 +439,13 @@ describe('Route', function() {
       inject(function (Route) {
         let writers = Route.getUrlWriters();
 
-        expect(_.keys(writers).length).toBe(2);
+        expect(_.keys(writers).length, '_.keys(writers) count').toBe(2);
 
         writers.writerA();
         writers.writerB();
 
-        expect(writerA).toHaveBeenCalled();
-        expect(writerB).toHaveBeenCalled();
+        expect(writerA, 'writerA toHaveBeenCalled').toHaveBeenCalled();
+        expect(writerB, 'writerB toHaveBeenCalled').toHaveBeenCalled();
       });
     });
   });
@@ -461,9 +461,8 @@ describe('Route', function() {
 
       inject(function($compile, $rootScope, State, Route) {
         State.set('page', 2);
-
-        expect(Route.invokeUrlWriter('pagination')).toBe('/page/2');
-        expect(Route.invokeUrlWriter('pagination', {page: 5})).toBe('/page/5');
+        expect(Route.invokeUrlWriter('pagination'), 'Route.invokeUrlWriter("pagination")').toBe('/page/2');
+        expect(Route.invokeUrlWriter('pagination', {page: 5}), 'Route.invokeUrlWriter("pagination", {page: 5})').toBe('/page/5');
       });
     });
 

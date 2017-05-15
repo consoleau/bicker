@@ -33,8 +33,8 @@ describe('View directive', function() {
         $httpBackend.verifyNoOutstandingRequest();
       });
 
-      expect(controller).not.toHaveBeenCalled();
-      expect(element.find('#contents').length).toBe(0);
+      expect(controller, 'controller not called').not.toHaveBeenCalled();
+      expect(element.find('#contents').length, '#contents count').toBe(0);
     });
   });
 
@@ -48,7 +48,6 @@ describe('View directive', function() {
         controller: 'StateVariationActrl',
         templateUrl: 'stateVariationA.html'
       });
-
     });
 
     mockLocationSuccess();
@@ -157,8 +156,8 @@ describe('View directive', function() {
       let element = createView('viewA');
       $httpBackend.verifyNoOutstandingRequest();
 
-      expect(controller).not.toHaveBeenCalled();
-      expect(element.find('#contents').length).toBe(0);
+      expect(controller, 'before: controller not called').not.toHaveBeenCalled();
+      expect(element.find('#contents').length, 'before: #contents count').toBe(0);
 
       State.set('stateField', 'some value');
 
@@ -166,8 +165,8 @@ describe('View directive', function() {
       triggerOpeningAnimationCompleteCallbacks();
       deliverMainTemplate();
 
-      expect(controller).toHaveBeenCalled();
-      expect(element.find('#contents').length).toBe(1);
+      expect(controller, 'after: controller not called').toHaveBeenCalled();
+      expect(element.find('#contents').length, 'after: #contents count').toBe(1);
     });
   });
 
@@ -202,8 +201,8 @@ describe('View directive', function() {
     triggerOpeningAnimationCompleteCallbacks();
     deliverMainTemplate();
 
-    expect(controllerA).not.toHaveBeenCalled();
-    expect(controllerB).toHaveBeenCalled();
+    expect(controllerA, 'controllerA should not be called').not.toHaveBeenCalled();
+    expect(controllerB, 'controllerB should be called').toHaveBeenCalled();
   });
 
   it('binds the view if the required state becomes available after the containing template is processed', function() {
@@ -228,8 +227,8 @@ describe('View directive', function() {
       const element = createView('viewA');
       $httpBackend.verifyNoOutstandingRequest();
 
-      expect(controller).not.toHaveBeenCalled();
-      expect(element.find('#contents').length).toBe(0);
+      expect(controller, 'before: controller should not be called').not.toHaveBeenCalled();
+      expect(element.find('#contents').length, 'before: #contents count').toBe(0);
 
       State.set('stateField', 'some value???');
 
@@ -237,8 +236,8 @@ describe('View directive', function() {
       triggerOpeningAnimationCompleteCallbacks();
       deliverMainTemplate();
 
-      expect(controller).toHaveBeenCalled();
-      expect(element.find('#contents').length).toBe(1);
+      expect(controller, 'after: controller should be called').toHaveBeenCalled();
+      expect(element.find('#contents').length, 'after: #contents count').toBe(1);
     });
   });
 
@@ -266,14 +265,14 @@ describe('View directive', function() {
       triggerOpeningAnimationCompleteCallbacks();
       deliverMainTemplate();
 
-      expect(controller).toHaveBeenCalled();
-      expect(element.find('#contents').length).toBe(1);
+      expect(controller, 'before: controller should be called').toHaveBeenCalled();
+      expect(element.find('#contents').length, 'before: #contents count').toBe(1);
 
       State.unset('stateField');
       triggerStateChangeEventConslidationTimeout();
       triggerOpeningAnimationCompleteCallbacks();
 
-      expect(element.find('#contents').length).toBe(0);
+      expect(element.find('#contents').length, 'after: #contents count').toBe(0);
     });
   });
 
@@ -309,7 +308,7 @@ describe('View directive', function() {
       triggerStateChangeEventConslidationTimeout();
       triggerOpeningAnimationCompleteCallbacks();
 
-      expect(destroyCalledCounter).toBe(1);
+      expect(destroyCalledCounter, 'destroyCalledCounter count').toBe(1);
     });
   });
 
@@ -350,10 +349,10 @@ describe('View directive', function() {
       triggerOpeningAnimationCompleteCallbacks();
       deliverMainTemplate();
 
-      expect(stateAController).toHaveBeenCalled();
-      expect(stateBController).not.toHaveBeenCalled();
-      expect(element.find('#contentsA').length).toBe(1);
-      expect(element.find('#contentsB').length).toBe(0);
+      expect(stateAController, 'before: stateAController should be called').toHaveBeenCalled();
+      expect(stateBController, 'before: stateBController should not be called').not.toHaveBeenCalled();
+      expect(element.find('#contentsA').length, 'before: #contentsA count').toBe(1);
+      expect(element.find('#contentsB').length, 'before: #contentsB count').toBe(0);
 
       triggerPendingViewCounterDecreaseTimeout();
 
@@ -363,9 +362,9 @@ describe('View directive', function() {
       triggerStateChangeEventConslidationTimeout();
       deliverMainTemplate();
 
-      expect(stateBController).toHaveBeenCalled();
-      expect(element.find('#contentsA').length).toBe(0);
-      expect(element.find('#contentsB').length).toBe(1);
+      expect(stateBController, 'after: stateBController should be called').toHaveBeenCalled();
+      expect(element.find('#contentsA').length, 'after: #contentsA count').toBe(0);
+      expect(element.find('#contentsB').length, 'after: #contentsB count').toBe(1);
     });
   });
 
@@ -404,13 +403,13 @@ describe('View directive', function() {
       triggerOpeningAnimationCompleteCallbacks();
       deliverMainTemplate();
 
-      expect(stateAController).toHaveBeenCalled();
+      expect(stateAController, 'before: stateAController should be called').toHaveBeenCalled();
       stateAController.calls.reset();
 
       State.set('stateFieldB', 'some value');
       triggerStateChangeEventConslidationTimeout();
 
-      expect(stateAController).not.toHaveBeenCalled();
+      expect(stateAController, 'before: stateAController should not be called').not.toHaveBeenCalled();
     });
   });
 
@@ -442,8 +441,8 @@ describe('View directive', function() {
       triggerDeliveryOfCachedTemplate();
       $httpBackend.verifyNoOutstandingRequest();
 
-      expect($templateCache.get('stateVariationA.html')).toBe(templateContents);
-      expect(controller.calls.count()).toBe(2);
+      expect($templateCache.get('stateVariationA.html'), '$templateCache contents').toBe(templateContents);
+      expect(controller.calls.count(), 'calls count').toBe(2);
     });
   });
 
@@ -480,9 +479,9 @@ describe('View directive', function() {
     triggerOpeningAnimationCompleteCallbacks();
     deliverMainTemplate();
 
-    expect(viewActrl).toHaveBeenCalled();
-    expect(viewBctrl).toHaveBeenCalled();
-    expect(element.find('#viewB').length).toEqual(1);
+    expect(viewActrl, 'viewActrl should be called').toHaveBeenCalled();
+    expect(viewBctrl, 'viewBctrl should be called').toHaveBeenCalled();
+    expect(element.find('#viewB').length, '#viewB count').toEqual(1);
   });
 
   it('resolves promises and injects them into the controller', function() {
@@ -514,16 +513,16 @@ describe('View directive', function() {
       triggerOpeningAnimationCompleteCallbacks();
       deliverMainTemplate();
 
-      expect(viewActrl).not.toHaveBeenCalled();
+      expect(viewActrl, 'viewActrl should not be called').not.toHaveBeenCalled();
       let mockedDependency = 'mockedDependency';
       deferred.resolve(mockedDependency);
       $rootScope.$digest();
 
-      expect(viewActrl).toHaveBeenCalled();
+      expect(viewActrl, 'viewActrl should be called').toHaveBeenCalled();
       // check second argument (1) for the first call (0) of the controller is the PromisedDependency.
       // The reason it's the second argument is because that's the order of the dependencies defined
       // above when controller was registered ($scope is the first)
-      expect(viewActrl.calls.argsFor(0)[1]).toBe(mockedDependency);
+      expect(viewActrl.calls.argsFor(0)[1], 'viewActrl calls args').toBe(mockedDependency);
     });
   });
 
@@ -553,14 +552,14 @@ describe('View directive', function() {
 
       deliverResolvingTemplate();
       triggerOpeningAnimationCompleteCallbacks();
-      expect(element.text()).toBe('resolving template');
+      expect(element.text(), 'before: element.text()').toBe('resolving template');
 
       deferred.resolve('mockedDependency');
       $rootScope.$digest();
 
       deliverMainTemplate();
       triggerResolvingTemplateDelayTimeout();
-      expect(element.text()).toBe('view A template');
+      expect(element.text(), 'after: element.text()').toBe('view A template');
     });
   });
 
@@ -593,12 +592,12 @@ describe('View directive', function() {
     deliverResolvingTemplate();
     triggerResolvingTemplateDelayTimeout();
     triggerOpeningAnimationCompleteCallbacks();
-    expect(element.text()).toBe('resolving template');
+    expect(element.text(), 'before: element.text()').toBe('resolving template');
 
     deferred.reject();
     deliverErrorTemplate();
 
-    expect(element.text()).toBe('error template');
+    expect(element.text(), 'after: element.text()').toBe('error template');
   });
 
   it('should show the resolvingErrorTemplateUrl if any of the resolve functions throw an error', function() {
@@ -624,11 +623,11 @@ describe('View directive', function() {
     deliverResolvingTemplate();
     triggerResolvingTemplateDelayTimeout();
     triggerOpeningAnimationCompleteCallbacks();
-    expect(element.text()).toBe('resolving template');
+    expect(element.text(), 'before: element.text()').toBe('resolving template');
 
     deliverErrorTemplate();
 
-    expect(element.text()).toBe('error template');
+    expect(element.text(), 'after: element.text()').toBe('error template');
   });
 
   it('should show the resolvingErrorComponent if any of the promises are rejected', function() {
@@ -663,13 +662,13 @@ describe('View directive', function() {
     deliverResolvingTemplate();
     triggerResolvingTemplateDelayTimeout();
     triggerOpeningAnimationCompleteCallbacks();
-    expect(element.text()).toBe('resolving template');
+    expect(element.text(), 'before: element.text()').toBe('resolving template');
 
     deferred.reject(error);
     deliverErrorTemplate();
 
-    expect(controller).toHaveBeenCalledWith(error);
-    expect(element.text()).toBe('error template');
+    expect(controller, 'controller toHaveBeenCalledWith').toHaveBeenCalledWith(error);
+    expect(element.text(), 'after: element.text()').toBe('error template');
   });
 
 
@@ -722,8 +721,8 @@ describe('View directive', function() {
     triggerOpeningAnimationCompleteCallbacks();
     deliverErrorTemplate();
 
-    expect(myErrorComponentController).toHaveBeenCalledWith(error);
-    expect(element.text()).toBe('error template');
+    expect(myErrorComponentController, 'myErrorComponentController toHaveBeenCalledWith').toHaveBeenCalledWith(error);
+    expect(element.text(), 'element.text()').toBe('error template');
   });
 
   it('increases the global pending view counter when it is created', function() {
@@ -774,8 +773,8 @@ describe('View directive', function() {
       deliverResolvingTemplate();
       triggerOpeningAnimationCompleteCallbacks();
 
-      expect(PendingViewCounter.get()).toBe(1);
-      expect(element.text()).toBe('resolving template');
+      expect(PendingViewCounter.get(), 'before: PendingViewCounter.get()').toBe(1);
+      expect(element.text(), 'element.text()').toBe('resolving template');
 
       deliverMainTemplate();
       triggerResolvingTemplateDelayTimeout();
@@ -784,7 +783,7 @@ describe('View directive', function() {
       $rootScope.$digest();
 
       triggerPendingViewCounterDecreaseTimeout();
-      expect(PendingViewCounter.get()).toBe(0);
+      expect(PendingViewCounter.get(), 'after: PendingViewCounter.get()').toBe(0);
     });
   });
 
@@ -821,8 +820,8 @@ describe('View directive', function() {
       deliverResolvingTemplate();
       triggerOpeningAnimationCompleteCallbacks();
 
-      expect(PendingViewCounter.get()).toBe(1);
-      expect(element.text()).toBe('resolving template');
+      expect(PendingViewCounter.get(), 'before: PendingViewCounter.get()').toBe(1);
+      expect(element.text(), 'element.text()').toBe('resolving template');
 
       deliverMainTemplate();
       triggerResolvingTemplateDelayTimeout();
@@ -831,7 +830,7 @@ describe('View directive', function() {
       $rootScope.$digest();
 
       triggerPendingViewCounterDecreaseTimeout();
-      expect(PendingViewCounter.get()).toBe(1);
+      expect(PendingViewCounter.get(), 'after: PendingViewCounter.get()').toBe(1);
     });
   });
 

@@ -25,8 +25,8 @@ describe('Router', function() {
     inject(function(State, $location, $rootScope) {
       $location.path('/a/b/c');
       $rootScope.$broadcast('$locationChangeSuccess', 'fake_new_url');
-      expect(State.get('testA')).toBe('hello');
-      expect(State.get('testB')).toBeUndefined();
+      expect(State.get('testA'), 'testA').toBe('hello');
+      expect(State.get('testB'), 'testB').toBeUndefined();
     });
   });
 
@@ -39,8 +39,8 @@ describe('Router', function() {
     inject(function(State, $location, $rootScope) {
       $location.path('/a/b/c');
       $rootScope.$broadcast('$locationChangeSuccess', 'fake_initial_url');
-      expect(State.get('testA')).toEqual('hello');
-      expect(State.get('testB')).toEqual('hai');
+      expect(State.get('testA'), 'fake_initial_url testA').toEqual('hello');
+      expect(State.get('testB'), 'fake_initial_url testB').toEqual('hai');
 
       spyOn(State, 'unset').and.callThrough();
 
@@ -49,9 +49,9 @@ describe('Router', function() {
 
       $rootScope.$broadcast('$locationChangeSuccess', 'fake_new_url');
 
-      expect(State.get('testB')).toBe('hello');
-      expect(State.get('testA')).toBeUndefined();
-      expect(State.unset).toHaveBeenCalledWith(['testA', 'testC']);
+      expect(State.get('testB'), 'fake_new_url testB').toBe('hello');
+      expect(State.get('testA'), 'fake_new_url testA').toBeUndefined();
+      expect(State.unset, 'fake_new_url State.unset').toHaveBeenCalledWith(['testA', 'testC']);
     });
   });
 
@@ -69,18 +69,18 @@ describe('Router', function() {
       $location.path('/a');
       $rootScope.$broadcast('$locationChangeSuccess', 'fake_initial_url');
 
-      expect(State.get('aonly')).toBe('a');
-      expect(State.get('bonly')).toBeUndefined();
-      expect(State.get('persi')).toBeUndefined();
+      expect(State.get('aonly'), 'fake_initial_url aonly').toBe('a');
+      expect(State.get('bonly'), 'fake_initial_url bonly').toBeUndefined();
+      expect(State.get('persi'), 'fake_initial_url persi').toBeUndefined();
       State.set('persi', 'penguin');
 
       $location.path('/b');
       $rootScope.$broadcast('$locationChangeSuccess', '/b');
 
-      expect(State.get('aonly')).toBeUndefined();
-      expect(State.get('bonly')).toBe('b');
-      expect(State.get('persi')).toBe('penguin');
-      expect(State.unset).toHaveBeenCalledWith(['aonly']);
+      expect(State.get('aonly'), 'location /b aonly').toBeUndefined();
+      expect(State.get('bonly'), 'location /b bonly').toBe('b');
+      expect(State.get('persi'), 'location /b persi').toBe('penguin');
+      expect(State.unset, 'location /b State.unset').toHaveBeenCalledWith(['aonly']);
     });
   });
 
@@ -94,14 +94,14 @@ describe('Router', function() {
       $location.path('/a');
       $rootScope.$broadcast('$locationChangeSuccess', 'fake_initial_url');
 
-      expect(State.get('flashState1')).toBe('flashValue');
-      expect(State.get('flashState2')).toBe('flashValue2');
+      expect(State.get('flashState1'), 'fake_initial_url flashState1').toBe('flashValue');
+      expect(State.get('flashState2'), 'fake_initial_url flashState2').toBe('flashValue2');
 
       $location.path('/b');
       $rootScope.$broadcast('$locationChangeSuccess', '/b');
 
-      expect(State.get('flashState1')).toBeUndefined();
-      expect(State.get('flashState2')).toBeUndefined();
+      expect(State.get('flashState1'), 'location /b flashState1').toBeUndefined();
+      expect(State.get('flashState2'), 'location /b flashState2').toBeUndefined();
     });
   });
 
@@ -113,8 +113,8 @@ describe('Router', function() {
 
       $rootScope.$broadcast('$locationChangeSuccess', 'fake_initial_url');
 
-      expect(State.set).toHaveBeenCalledWith('a', 21);
-      expect(State.set).toHaveBeenCalledWith('b', 'zzz');
+      expect(State.set,'state a').toHaveBeenCalledWith('a', 21);
+      expect(State.set,'state b').toHaveBeenCalledWith('b', 'zzz');
     });
   });
 
@@ -167,9 +167,9 @@ describe('Router', function() {
       $rootScope.$on('bicker_router.beforeStateChange', handler);
       $rootScope.$broadcast('$locationChangeSuccess', url);
 
-      expect(State.unset).toHaveBeenCalledWith(unsetting);
-      expect(State.set).toHaveBeenCalledWith('d', 'e');
-      expect(State.set).toHaveBeenCalledWith('f', 'g');
+      expect(State.unset, '$locationChangeSuccess State.unset').toHaveBeenCalledWith(unsetting);
+      expect(State.set, 'State.set d,e').toHaveBeenCalledWith('d', 'e');
+      expect(State.set, 'State.set f,g').toHaveBeenCalledWith('f', 'g');
     });
   });
 });

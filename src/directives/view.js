@@ -121,7 +121,7 @@ class routeViewDirective {
         }
         viewCreated = false;
         element.children().eq(0).remove();
-        return viewScope.$destroy();
+        viewScope.$destroy();
       }
 
       function createView(element, binding, minimumDelay) {

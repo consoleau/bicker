@@ -32,6 +32,13 @@ grunt.initConfig({
     }
   },
 
+  eslint: {
+    options: {
+
+    },
+    target: ['.']
+  },
+
   karma: {
     unit: {
       configFile: 'test/karma/karma.conf.js'
@@ -93,4 +100,3 @@ grunt.initConfig({
 grunt.registerTask('dist', ['clean:dist', 'concat:dist', 'browserify:dist', 'uglify:dist']);
 grunt.registerTask('default', ['dist']);
 grunt.registerTask('test', ['karma']);
-grunt.registerTask('eslint', ['eslint']);

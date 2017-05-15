@@ -17,11 +17,11 @@ describe('routeHref directive', function() {
       let element = $compile('<a route-href="paginationUrlWriter()">Link</a>')($rootScope.$new());
       $rootScope.$digest();
 
-      expect(element.attr('href')).toBe('#/page/2');
+      expect(element.attr('href'), 'before: href value').toBe('#/page/2');
 
       State.set('page', 3);
       $rootScope.$digest();
-      expect(element.attr('href')).toBe('#/page/3');
+      expect(element.attr('href'), 'after: href value').toBe('#/page/3');
     });
   });
 
@@ -58,7 +58,7 @@ describe('routeHref directive', function() {
       let scope = $rootScope.$new();
       let element = $compile('<a route-href="paginationUrlWriter()">Link</a>')(scope);
       $rootScope.$digest();
-      expect(element.attr('href')).toBe('#/page/2');
+      expect(element.attr('href'), 'href value').toBe('#/page/2');
 
       spyOn($location, 'url');
 
@@ -69,8 +69,8 @@ describe('routeHref directive', function() {
 
       $timeout.flush();
 
-      expect($location.url).toHaveBeenCalled();
-      expect(event.isDefaultPrevented()).toBe(true);
+      expect($location.url, '$location.url should be called').toHaveBeenCalled();
+      expect(event.isDefaultPrevented(), 'should prevent event default').toBe(true);
     });
   });
 
@@ -83,7 +83,7 @@ describe('routeHref directive', function() {
     inject(function($rootScope, $compile, $location, $timeout) {
       let element = $compile('<a route-href="hashUrlWriter()" ignore-href>Link</a>')($rootScope.$new());
       $rootScope.$digest();
-      expect(element.attr('href')).toBe('#test');
+      expect(element.attr('href'), 'href value').toBe('#test');
 
       spyOn($location, 'url');
 
@@ -94,8 +94,8 @@ describe('routeHref directive', function() {
 
       $timeout.verifyNoPendingTasks();
 
-      expect($location.url).not.toHaveBeenCalled();
-      expect(event.isDefaultPrevented()).toBe(false);
+      expect($location.url, '$location.url should be called').not.toHaveBeenCalled();
+      expect(event.isDefaultPrevented(), 'should not prevent event default').toBe(false);
     });
   });
 });
