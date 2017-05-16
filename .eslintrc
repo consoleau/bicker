@@ -1,0 +1,35 @@
+{
+  "env": {
+    "browser": true,
+    "node": true,
+    "jasmine": true,
+    "es6": true
+  },
+  "plugins": [
+    "console-saas-rules",
+    "no-only-tests"
+  ],
+  "globals": {
+    "angular": true,
+    "_": true,
+    "Decimal": false,
+    "moment": false,
+    "jQuery": false,
+    "$": false,
+    "module": false,
+    "inject": false
+  },
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module"
+  },
+  "rules": {
+    "no-console": ["error", { "allow": ["warn", "error"] }],
+    "console-saas-rules/component-defined-inline": "error",
+    "console-saas-rules/exporting-angular-module": "error",
+    "console-saas-rules/ngInject-angular-classes": "error",
+    "console-saas-rules/ngInject-resolve-objects": "error",
+    "console-saas-rules/preserve-di-assignment-case": "error",
+    "console-saas-rules/multiple-assertions-checker": "error"
+  }
+}

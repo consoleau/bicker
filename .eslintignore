@@ -1,0 +1,8 @@
+**/*.ico
+node_modules
+**/node_modules
+dist
+hiptest
+examples
+bower_components
+.idea

@@ -1,0 +1,125 @@
+{
+  "root": true,
+  "env": {
+    "browser": true,
+    "node": true,
+    "jasmine": true,
+    "es6": true
+  },
+  "plugins": [
+    "console-saas-rules",
+    "no-only-tests"
+  ],
+  // any global libraries like angular, lodash, jquery need to be defined here
+  "globals": {
+
+    // all codebases
+    // declaring false says they can't be overwritten, not they're not globals
+    // http://eslint.org/docs/user-guide/configuring#specifying-globals
+
+    "angular": true,
+    "_": true,
+    "Decimal": false,
+    "moment": false,
+    "jQuery": false,
+    "$": false,
+    "module": false,
+
+    // test globals
+    "chai": false,
+    "sinon": false,
+    "expect": false,
+    "inject": false
+  },
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module"
+  },
+  "rules": {
+    // Error checks
+    "no-cond-assign": ["error"],
+    // no-console is turned on in ./client
+    "no-console": ["off"],
+    "no-constant-condition": ["error"],
+    "no-control-regex": ["off"],
+    "no-debugger": ["error"],
+    "no-dupe-args": ["error"],
+    "no-dupe-keys": ["error"],
+    "no-duplicate-case": ["error"],
+    "no-empty-character-class": ["error"],
+    "no-empty": ["off"],
+    "no-ex-assign": ["error"],
+    "no-extra-boolean-cast": ["error"],
+    "no-extra-parens": ["off"],
+    "no-extra-semi": ["error"],
+    "no-func-assign": ["error"],
+    "no-inner-declarations": ["error"],
+    "no-invalid-regexp": ["error"],
+    "no-irregular-whitespace": ["error"],
+    "no-obj-calls": ["error"],
+    "no-only-tests/no-only-tests": ["error"],
+    "no-prototype-builtins": ["off"],
+    "no-regex-spaces": ["error"],
+    "no-sparse-arrays": ["error"],
+    "no-template-curly-in-string": ["off"],
+    "no-unexpected-multiline": ["error"],
+    "no-unreachable": ["error"],
+    "no-unsafe-finally": ["error"],
+    "no-unsafe-negation": ["error"],
+    "use-isnan": ["error"],
+    "valid-jsdoc": ["off"],
+    "valid-typeof": ["error"],
+
+    // Best Practices
+    "array-callback-return": ["error"],
+    "curly": ["error", "multi-line"],
+    "eqeqeq": ["error"],
+    "no-alert": ["error"],
+    "no-case-declarations": ["error"],
+    "no-empty-pattern": ["error"],
+    "no-fallthrough": ["error"],
+    "no-octal": ["error"],
+    "no-redeclare": ["error"],
+    "no-self-assign": ["error"],
+    "no-unused-labels": ["error"],
+
+    // variables
+    "no-delete-var": ["error"],
+    "no-undef": ["error"],
+    "no-unused-vars": ["error", { "args": "none" }],
+
+    // Stylistic Issues
+    "block-spacing": ["error", "always"],
+    "brace-style": ["error", "1tbs", { "allowSingleLine": true }],
+    "comma-dangle": ["error", "never"],
+    "comma-spacing": ["error", { "before": false, "after": true }],
+    "comma-style": ["error", "last"],
+    "eol-last": ["error", "always"],
+    "func-call-spacing": ["error", "never"],
+    "keyword-spacing": ["error"],
+    "indent": ["error", 2, { "SwitchCase": 1 }],
+    "no-lonely-if": ["error"],
+    "no-mixed-spaces-and-tabs": ["error"],
+    "no-multiple-empty-lines": ["error"],
+    "no-whitespace-before-property": ["error"],
+    "semi": ["error", "always"],
+    "semi-spacing": ["error"],
+
+    // ES6
+    "arrow-spacing": ["error"],
+    "constructor-super": ["error"],
+    "no-class-assign": ["error"],
+    "no-confusing-arrow": ["error", {"allowParens": false}],
+    "no-const-assign": ["error"],
+    "no-dupe-class-members": ["error"],
+    "no-new-symbol": ["error"],
+    "no-this-before-super": ["error"],
+    "no-useless-constructor": ["error"],
+    "no-var": ["error"],
+    "prefer-const": ["error"],
+    "prefer-rest-params": ["error"],
+    "prefer-spread": ["error"],
+    "prefer-template": ["error"],
+    "require-yield": ["error"],
+  }
+}
