@@ -2,15 +2,16 @@
 
 const grunt = require('grunt');
 
-grunt.loadNpmTasks('grunt-contrib-concat');
-grunt.loadNpmTasks('grunt-contrib-uglify');
-grunt.loadNpmTasks('grunt-contrib-clean');
-grunt.loadNpmTasks('grunt-karma');
-grunt.loadNpmTasks('grunt-express-server');
-grunt.loadNpmTasks('grunt-contrib-copy');
-grunt.loadNpmTasks('grunt-ng-annotate');
 grunt.loadNpmTasks('grunt-browserify');
+grunt.loadNpmTasks('grunt-contrib-clean');
+grunt.loadNpmTasks('grunt-contrib-concat');
+grunt.loadNpmTasks('grunt-contrib-copy');
+grunt.loadNpmTasks('grunt-contrib-uglify');
+grunt.loadNpmTasks('grunt-contrib-watch');
 grunt.loadNpmTasks('grunt-eslint');
+grunt.loadNpmTasks('grunt-express-server');
+grunt.loadNpmTasks('grunt-karma');
+grunt.loadNpmTasks('grunt-ng-annotate');
 
 grunt.initConfig({
   concat: {
@@ -93,6 +94,17 @@ grunt.initConfig({
         src: 'dist/bicker.js',
         dest: 'examples/lib/bicker.js'
       }]
+    }
+  },
+
+  watch: {
+    concat: {
+      files: ['src/**/*.js'],
+      tasks: ['concat:dist']
+    },
+    transform: {
+      files: ['dist/bicker.js'],
+      tasks: ['browserify:dist', 'uglify:dist']
     }
   }
 });

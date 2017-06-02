@@ -313,8 +313,10 @@ class routeViewDirective {
           return;
         }
 
-        const stateWatcher = function () {
+        const stateWatcher = function (changedPath, newValue, oldValue) {
+          // console.log(`${iAttrs.name} : stateWatcher called with changedPath: ${changedPath}, newValue: ${JSON.stringify(newValue, {}, 2)},  oldValue: ${JSON.stringify(oldValue, {}, 2)}`)
           if (viewManagementPending) {
+            // console.log(`${iAttrs.name} : stateWatcher called pending true. Abort`)
             return;
           }
           viewManagementPending = true;
