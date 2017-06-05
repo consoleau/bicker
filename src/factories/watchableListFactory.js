@@ -21,7 +21,7 @@ class WatchableList {
 
   set(path, value) {
     this.ObjectHelper.set(this.list, path, value);
-    return this._notifyWatchers(path, value);
+    this._notifyWatchers(path, value);
   }
 
   unset(paths) {
@@ -29,9 +29,10 @@ class WatchableList {
       paths = [paths];
     }
 
-    return Array.from(paths).map((path) =>
-      (this.ObjectHelper.unset(this.list, path),
-        this._notifyWatchers(path, undefined)));
+    _(paths).each((path) => {
+      this.ObjectHelper.unset(this.list, path);
+      this._notifyWatchers(path, undefined);
+    });
   }
 
   watch(paths, handler) {
@@ -39,8 +40,9 @@ class WatchableList {
       paths = [paths];
     }
 
-    return Array.from(paths).map((path) =>
-      this.watchers.push(this.WatcherFactory.create(path, handler, this.get(path))));
+    _(paths).each((path) => {
+      this.watchers.push(this.WatcherFactory.create(path, handler, this.get(path)));
+    });
   }
 
   removeWatcher(watcher) {
@@ -58,18 +60,13 @@ class WatchableList {
     return this.watchers = newWatchers;
   }
 
-  _notifyWatchers(changedPath) {
-    const result = [];
+  _notifyWatchers(changedPath, newValue) {
     _.each(this.watchers, watcher => {
-      let item;
-      const watchedValue = this.ObjectHelper.get(this.list, watcher.watchPath);
-
-      if (watcher.shouldNotify(changedPath, watchedValue)) {
-        item = watcher.notify(changedPath, watchedValue);
+      if (watcher.shouldNotify(changedPath, newValue)) {
+        const newValueAtWatchedPath = this.ObjectHelper.get(this.list, watcher.watchPath);
+        watcher.notify(changedPath, newValueAtWatchedPath);
       }
-      result.push(item);
     });
-    return result;
   }
 }
 

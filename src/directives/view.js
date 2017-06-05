@@ -313,7 +313,7 @@ class routeViewDirective {
           return;
         }
 
-        const stateWatcher = function () {
+        const stateWatcher = function (changedPath, newValue, oldValue) {
           if (viewManagementPending) {
             return;
           }

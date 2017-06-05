@@ -56,8 +56,7 @@ describe('WatchableListFactory', function() {
     expect(lastCall.args[0]).toBe('a.b');
     expect(lastCall.args[1]).toEqual(jasmine.objectContaining({b: 'n'}));
     expect(lastCall.args[2]).toEqual(jasmine.objectContaining({b: 'z'}));
-  })
-  );
+  }));
 
   it('does not notify watchers that have been removed', inject(function(WatchableListFactory) {
     const watchableList = WatchableListFactory.create();
