@@ -259,7 +259,7 @@ class routeViewDirective {
         const {template} = args;
 
         element.html(template);
-        element.on('$destroy', () => { console.log(`${iattrs.name}: on element destroy`) })
+        element.on('$destroy', () => { console.log(`${iAttrs.name}: DESTROY DESTROY on element destroy`) })
         const link = $compile(element.contents());
         viewScope = viewDirectiveScope.$new();
 
@@ -325,7 +325,7 @@ class routeViewDirective {
         const stateWatcher = function (changedPath, newValue, oldValue) {
           console.log(`${iAttrs.name} : stateWatcher called with changedPath: ${changedPath}, newValue: ${JSON.stringify(newValue, {}, 2)},  oldValue: ${JSON.stringify(oldValue, {}, 2)}`)
           if (viewManagementPending) {
-            console.log(`${iAttrs.name} : stateWatcher called pending true. Abort`)
+            console.log(`${iAttrs.name} : stateWatcher called pending true. Abort`);
             return;
           }
           viewManagementPending = true;
@@ -333,7 +333,7 @@ class routeViewDirective {
           // Wrapped in a timeout so that we can finish the digest cycle before building the view, which should
           // prevent us from re-rendering a view multiple times if multiple properties of the same state dependency
           // get changed with repeated State.set calls
-          console.log(`${iAttrs.name} : stateWatcher calling manageView`)
+          console.log(`${iAttrs.name} : stateWatcher calling manageView`);
           return $timeout(function () {
             manageView(iElement, bindings);
             return viewManagementPending = false;
