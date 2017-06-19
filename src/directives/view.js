@@ -10,6 +10,8 @@ class routeViewDirective {
 
     this.link = (viewDirectiveScope, iElement, iAttrs) => {
 
+      console.log(`linking new view : ${iAttrs.name}`)
+
       let viewCreated = false;
       let viewScope = undefined;
       let viewManagementPending = false;
@@ -70,6 +72,7 @@ class routeViewDirective {
         const matchingBinding = getMatchingBinding(bindings);
 
         if (!matchingBinding) {
+          console.log(`${iAttrs.name} : manageView : no matching binding`)
           if (viewCreated) {
             $animate.addClass(element, 'ng-hide').then(() => {
               return destroyView(element);
@@ -80,8 +83,11 @@ class routeViewDirective {
           return;
         }
 
+
         const newState = getStateDataForBinding(matchingBinding);
+        console.log(`${iAttrs.name} : manageView : matching binding yeilds state : ${JSON.stringify(newState, {}, 2)}`)
         if ((matchingBinding === previousBinding) && angular.equals(previousBoundState, newState)) {
+          console.log(`${iAttrs.name} : manageView : binding state matches existing. Aborting`)
           return;
         }
 
@@ -90,10 +96,12 @@ class routeViewDirective {
 
         PendingViewCounter.increase();
 
+        console.log(`${iAttrs.name} : manageView : resolving and showing resolve template`)
         return showResolvingTemplate(element, matchingBinding).then(function (hasResolvingTemplate) {
           // @TODO: Magic number
           const delayForRealTemplateInsertion = hasResolvingTemplate ? 300 : undefined;
 
+          console.log(`${iAttrs.name} : manageView : resolve done, now creatingView`)
           if (!viewCreated) {
             return $animate.removeClass(element, 'ng-hide').then(() => {
               return createView(element, matchingBinding, delayForRealTemplateInsertion);
@@ -251,6 +259,7 @@ class routeViewDirective {
         const {template} = args;
 
         element.html(template);
+        element.on('$destroy', () => { console.log(`${iattrs.name}: on element destroy`) })
         const link = $compile(element.contents());
         viewScope = viewDirectiveScope.$new();
 
@@ -314,9 +323,9 @@ class routeViewDirective {
         }
 
         const stateWatcher = function (changedPath, newValue, oldValue) {
-          // console.log(`${iAttrs.name} : stateWatcher called with changedPath: ${changedPath}, newValue: ${JSON.stringify(newValue, {}, 2)},  oldValue: ${JSON.stringify(oldValue, {}, 2)}`)
+          console.log(`${iAttrs.name} : stateWatcher called with changedPath: ${changedPath}, newValue: ${JSON.stringify(newValue, {}, 2)},  oldValue: ${JSON.stringify(oldValue, {}, 2)}`)
           if (viewManagementPending) {
-            // console.log(`${iAttrs.name} : stateWatcher called pending true. Abort`)
+            console.log(`${iAttrs.name} : stateWatcher called pending true. Abort`)
             return;
           }
           viewManagementPending = true;
@@ -324,6 +333,7 @@ class routeViewDirective {
           // Wrapped in a timeout so that we can finish the digest cycle before building the view, which should
           // prevent us from re-rendering a view multiple times if multiple properties of the same state dependency
           // get changed with repeated State.set calls
+          console.log(`${iAttrs.name} : stateWatcher calling manageView`)
           return $timeout(function () {
             manageView(iElement, bindings);
             return viewManagementPending = false;
