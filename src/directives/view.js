@@ -1,15 +1,14 @@
 // @TODO none of the animation code in this directive has been tested. Not sure if it can be at this stage This needs further investigation.
 // @TODO this code does too much, it should be refactored.
 
-class routeViewDirective {
-  constructor($log, $compile, $controller, ViewBindings, $q, State, $rootScope, $animate, $timeout, $injector, PendingViewCounter, $templateRequest, Route) {
-    this.restrict = 'E';
-    this.scope = false;
-    this.replace = true;
-    this.template = '<div></div>';
-
-    this.link = (viewDirectiveScope, iElement, iAttrs) => {
-
+function routeViewFactory($log, $compile, $controller, ViewBindings, $q, State, $rootScope, $animate, $timeout, $injector, PendingViewCounter, $templateRequest, Route) {
+  'nginject';
+  return {
+    restrict: 'E',
+    scope: false,
+    replace: true,
+    template: '<div></div>',
+    link (viewDirectiveScope, iElement, iAttrs) {
       let viewCreated = false;
       let viewScope = undefined;
       let viewManagementPending = false;
@@ -76,6 +75,7 @@ class routeViewDirective {
             });
             previousBoundState = undefined;
             previousBinding = undefined;
+            Route.deleteCurrentBinding(view.name)
           }
           return;
         }
@@ -173,6 +173,7 @@ class routeViewDirective {
           return showResolvingError(error, element, binding);
         };
 
+        Route.setCurrentBinding(view.name, binding)
         const promises = {template: $templateRequest(component.templateUrl), dependencies: resolve(binding)};
         return $q.all(promises).then(onSuccessfulResolution, onResolutionFailure);
       }
@@ -257,8 +258,26 @@ class routeViewDirective {
         if (component.controller) {
           const locals = _.merge(dependencies, {$scope: viewScope, $element: element.children().eq(0)});
 
-          const controller = $controller(component.controller, locals);
-          locals.$scope[component.controllerAs] = controller;
+          try {
+            locals.$scope[component.controllerAs] = $controller(component.controller, locals);
+          }
+          catch (error) {
+            let errorMessage;
+
+            try {
+              if (_.isObject(error)) {
+                errorMessage = JSON.stringify(error);
+              } else {
+                errorMessage = error;
+              }
+
+            } catch (jsonError) {
+              errorMessage = 'Failed to serialize error object for logging';
+            }
+
+            $log.error(`Failed instantiating controller for view ${view}: ${errorMessage}`);
+            throw error;
+          }
         }
 
         return link(viewScope);
@@ -332,11 +351,8 @@ class routeViewDirective {
 
         viewDirectiveScope.$on('$destroy', () => State.removeWatcher(stateWatcher));
       });
-    };
+    }
   }
 }
 
-angular.module('bicker_router').directive('view', ($log, $compile, $controller, ViewBindings, $q, State, $rootScope, $animate, $timeout, $injector, PendingViewCounter, $templateRequest, Route) => {
-  'ngInject';
-  return new routeViewDirective($log, $compile, $controller, ViewBindings, $q, State, $rootScope, $animate, $timeout, $injector, PendingViewCounter, $templateRequest, Route);
-});
+angular.module('bicker_router').directive('view', routeViewFactory);
