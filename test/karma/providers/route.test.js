@@ -512,4 +512,60 @@ describe('Route', function() {
       inject(Route => expect(Route.getPersistentStates()).toEqual(['a']));
     });
   });
+
+  describe('Storing currently rendered bindings for views', function () {
+    it('set/get should work as expected', function() {
+      const binding = {};
+
+      inject(Route => {
+        Route.setCurrentBinding('viewName', binding);
+        expect(Route.getCurrentBinding('viewName', binding)).toBe(binding);
+      });
+    });
+
+    it('set/delete/get should work as expected', function() {
+      const binding = {};
+
+      inject(Route => {
+        Route.setCurrentBinding('viewName', binding);
+        Route.deleteCurrentBinding('viewName');
+        expect(Route.getCurrentBinding('viewName', binding)).toBe(undefined);
+      });
+    });
+  });
+
+  describe('matchesCurrentBindingName', function () {
+    it('should return false if there is no binding rendered in the nominated view', function () {
+      inject(Route => {
+        expect(Route.matchesCurrentBindingName('viewName', 'myBinding')).toBe(false);
+      });
+    }),
+
+    it('should return true if the current binding name exactly matches the string provided', function () {
+      const binding = { name: 'myBinding' };
+
+      inject(Route => {
+        Route.setCurrentBinding('viewName', binding);
+        expect(Route.matchesCurrentBindingName('viewName', 'myBinding')).toBe(true);
+      });
+    });
+
+    it('should return true if the current binding name matches the regexp provided', function () {
+      const binding = { name: 'myBinding' };
+
+      inject(Route => {
+        Route.setCurrentBinding('viewName', binding);
+        expect(Route.matchesCurrentBindingName('viewName', /^my/ )).toBe(true);
+      });
+    });
+
+    it('should return false if the current binding name does not match the provided value', function () {
+      const binding = { name: 'myBinding' };
+
+      inject(Route => {
+        Route.setCurrentBinding('viewName', binding);
+        expect(Route.matchesCurrentBindingName('viewName', 'someOtherValue')).toBe(false);
+      });
+    });
+  });
 });

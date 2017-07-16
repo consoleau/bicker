@@ -107,6 +107,7 @@ angular.module('bicker_router').provider('Route', function(ObjectHelper) {
       let flashStates = [];
 
       const service = {
+        currentBindings: {},
         readyDeferred: $q.defer(),
 
         match(urlToMatch) {
@@ -214,6 +215,30 @@ angular.module('bicker_router').provider('Route', function(ObjectHelper) {
 
         getFlashStates() {
           return flashStates;
+        },
+
+        setCurrentBinding(viewName, binding) {
+          this.currentBindings[viewName] = binding;
+        },
+
+        getCurrentBinding(viewName) {
+          return this.currentBindings[viewName];
+        },
+
+        deleteCurrentBinding(viewName) {
+          delete this.currentBindings[viewName];
+        },
+
+        matchesCurrentBindingName(viewName, bindingNameExpression) {
+          const currentBinding = this.getCurrentBinding(viewName)
+
+          if (!currentBinding) {
+            return false
+          }
+
+          return bindingNameExpression instanceof RegExp ?
+            bindingNameExpression.test(currentBinding.name) :
+            currentBinding.name === bindingNameExpression;
         },
 
         setReady(ready) {

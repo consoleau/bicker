@@ -276,6 +276,40 @@ describe('View directive', function() {
     });
   });
 
+  it('stores the current binding for a view inside the Route service', function() {
+    const controller = jasmine.createSpy();
+    const binding = {
+      controller: 'StateVariationActrl',
+      templateUrl: 'stateVariationA.html',
+      requiredState: ['stateField']
+    };
+
+    window.angular.mock.module(function(RouteProvider, ViewBindingsProvider, $controllerProvider) {
+      RouteProvider.registerUrl('/fake_initial_url');
+      $controllerProvider.register('StateVariationActrl', ['$scope', '$element', controller]);
+      RouteProvider.setPersistentStates('stateField');
+      ViewBindingsProvider.bind('viewA', binding);
+    });
+
+    mockTemplateRequest('stateVariationA.html', '<div id="contents"></div>');
+    mockLocationSuccess();
+
+    inject(function($compile, $httpBackend, State, Route) {
+      State.set('stateField', 'some value');
+
+      const element = createView('viewA');
+      triggerOpeningAnimationCompleteCallbacks();
+      deliverMainTemplate();
+      expect(Route.getCurrentBinding('viewA')).toBe(binding);
+
+      State.unset('stateField');
+      triggerStateChangeEventConslidationTimeout();
+      triggerOpeningAnimationCompleteCallbacks();
+      expect(Route.getCurrentBinding('viewA')).toBe(undefined);
+    });
+  });
+
+
   it('results in $element $destroy event being triggered when the view binding is removed', function() {
     let destroyCalledCounter = 0;
 
