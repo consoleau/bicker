@@ -2,7 +2,7 @@
 // @TODO this code does too much, it should be refactored.
 
 function routeViewFactory($log, $compile, $controller, ViewBindings, $q, State, $rootScope, $animate, $timeout, $injector, PendingViewCounter, $templateRequest, Route) {
-  'nginject';
+  'ngInject';
   return {
     restrict: 'E',
     scope: false,
