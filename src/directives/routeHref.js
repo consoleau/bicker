@@ -8,13 +8,17 @@ function routeHrefFactory (Route, $location, $timeout) {
     if (iAttrs.ignoreHref === undefined) {
       iElement.click((event) => {
         event.preventDefault();
-        let url = iElement.attr('href');
+        let urlPath = iElement.attr('href');
 
-        if (!Route.isHtml5ModeEnabled()) {
-          url = url.replace(/^#/, '');
+        if (event.metaKey) {
+          const fullUrl = $location.absUrl().split('/')[0] + urlPath;
+          window.open(fullUrl,'_blank')
+        } else {
+          if (!Route.isHtml5ModeEnabled()) {
+            urlPath = urlPath.replace(/^#/, '');
+          }
+          return $timeout(() => $location.url(urlPath));
         }
-
-        return $timeout(() => $location.url(url));
       });
     }
 
