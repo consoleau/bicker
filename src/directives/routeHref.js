@@ -1,4 +1,4 @@
-function routeHrefFactory (Route, $location, $timeout) {
+function routeHrefFactory (Route, $window, $location, $timeout) {
   'ngInject'
 
   return {
@@ -11,8 +11,8 @@ function routeHrefFactory (Route, $location, $timeout) {
         let urlPath = iElement.attr('href');
 
         if (event.metaKey) {
-          const fullUrl = $location.absUrl().split('/')[0] + urlPath;
-          window.open(fullUrl,'_blank')
+          const fullUrl = $window.location.protocol + "//" + $window.location.host + urlPath;
+          $window.open(fullUrl,'_blank')
         } else {
           if (!Route.isHtml5ModeEnabled()) {
             urlPath = urlPath.replace(/^#/, '');

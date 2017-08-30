@@ -94,8 +94,42 @@ describe('routeHref directive', function() {
 
       $timeout.verifyNoPendingTasks();
 
-      expect($location.url, '$location.url should be called').not.toHaveBeenCalled();
+      expect($location.url, '$location.url should not be called').not.toHaveBeenCalled();
       expect(event.isDefaultPrevented(), 'should not prevent event default').toBe(false);
     });
   });
+
+  it('should open the url in a new window for CTRL+click', function() {
+    window.angular.mock.module(function(RouteProvider) {
+      RouteProvider.registerUrlWriter('hash', () => '#/contacts/update/1');
+      RouteProvider.setHtml5Mode(false);
+    });
+
+    inject(function($rootScope, $compile, $window, $location, $timeout) {
+      let element = $compile('<a route-href="hashUrlWriter()">Link</a>')($rootScope.$new());
+      $rootScope.$digest();
+
+      // spyOn($location, 'url');
+      spyOn($window, 'open');
+
+      let mockEvent = {
+        metaKey: true,
+        type: 'click'
+      };
+
+      // element.click(e => mockEvent = e);
+      // element.click();
+      // element.triggerHandler(mockEvent);
+      element.triggerHandler('click', mockEvent);
+
+      // $timeout.verifyNoPendingTasks();
+      $timeout.flush()
+
+      expect($window.open, '$window.open should be called').toHaveBeenCalled();
+
+      // expect($window.open, '$window.open should be called').toHaveBeenCalledWith('_blank');
+      // expect($location.url, '$location.url should not be called').not.toHaveBeenCalled();
+      // expect(event.isDefaultPrevented(), 'should prevent event default').toBe(true);
+    });
+  })
 });
