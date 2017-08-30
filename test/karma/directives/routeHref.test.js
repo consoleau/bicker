@@ -105,31 +105,28 @@ describe('routeHref directive', function() {
       RouteProvider.setHtml5Mode(false);
     });
 
-    inject(function($rootScope, $compile, $window, $location, $timeout) {
+    inject(function($rootScope, $compile, $window, $location) {
       let element = $compile('<a route-href="hashUrlWriter()">Link</a>')($rootScope.$new());
       $rootScope.$digest();
 
-      // spyOn($location, 'url');
-      spyOn($window, 'open').and.callThrough();
+      $window.location.origin = 'http://localhost';
+      spyOn($window, 'open');
+      spyOn($location, 'url');
 
-      let mockEvent = {
-        type: 'click',
-        metaKey: true
-      };
+      let event = jasmine.createSpyObj('clickEvent', {
+        'open': _.noop(),
+        'preventDefault': _.noop()
+      });
+      event.type = 'click';
+      event.metaKey = true;
 
-      element.triggerHandler('click', mockEvent);
-      // element.triggerHandler(mockEvent);
-      // element.click(e => mockEvent = e);
-      element.click();
+      element.triggerHandler(event);
+      $rootScope.$digest();
 
-      // $timeout.verifyNoPendingTasks();
-      $timeout.flush()
-
-      expect($window.open, '$window.open should be called').toHaveBeenCalled();
-
-      // expect($window.open, '$window.open should be called').toHaveBeenCalledWith('_blank');
-      // expect($location.url, '$location.url should not be called').not.toHaveBeenCalled();
-      // expect(event.isDefaultPrevented(), 'should prevent event default').toBe(true);
+      const expectedNewWindowUrl = $window.location.origin + '/#/contacts/update/1';
+      expect($window.open, '$window.open should be called with correct params').toHaveBeenCalledWith(expectedNewWindowUrl, '_blank');
+      expect($location.url, '$location.url should not be called').not.toHaveBeenCalled();
+      expect(event.preventDefault, 'should prevent event default').toHaveBeenCalled();
     });
   })
 });
