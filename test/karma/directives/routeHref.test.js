@@ -113,14 +113,14 @@ describe('routeHref directive', function() {
       spyOn($window, 'open');
 
       let mockEvent = {
-        metaKey: true,
-        type: 'click'
+        type: 'click',
+        metaKey: true
       };
 
-      // element.click(e => mockEvent = e);
-      // element.click();
-      // element.triggerHandler(mockEvent);
       element.triggerHandler('click', mockEvent);
+      // element.triggerHandler(mockEvent);
+      // element.click(e => mockEvent = e);
+      element.click();
 
       // $timeout.verifyNoPendingTasks();
       $timeout.flush()
