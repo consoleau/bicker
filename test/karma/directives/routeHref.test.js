@@ -110,7 +110,7 @@ describe('routeHref directive', function() {
       $rootScope.$digest();
 
       // spyOn($location, 'url');
-      spyOn($window, 'open');
+      spyOn($window, 'open').and.callThrough();
 
       let mockEvent = {
         type: 'click',
