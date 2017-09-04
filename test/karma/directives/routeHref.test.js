@@ -76,14 +76,13 @@ describe('routeHref directive', function() {
 
   it('should ignore the route href when the ignore-href attribute is added to the anchor element', function() {
     window.angular.mock.module(function(RouteProvider) {
-      RouteProvider.registerUrlWriter('hash', () => '#test');
+      RouteProvider.registerUrlWriter('path', () => 'test');
       RouteProvider.setHtml5Mode(true);
     });
 
     inject(function($rootScope, $compile, $location, $timeout) {
-      let element = $compile('<a route-href="hashUrlWriter()" ignore-href>Link</a>')($rootScope.$new());
+      let element = $compile('<a route-href="pathUrlWriter()" ignore-href>Link</a>')($rootScope.$new());
       $rootScope.$digest();
-      expect(element.attr('href'), 'href value').toBe('#test');
 
       spyOn($location, 'url');
 
@@ -101,12 +100,12 @@ describe('routeHref directive', function() {
 
   it('should open the url in a new window for CTRL+click', function() {
     window.angular.mock.module(function(RouteProvider) {
-      RouteProvider.registerUrlWriter('hash', () => '#/contacts/update/1');
+      RouteProvider.registerUrlWriter('path', () => '/contacts/update/1');
       RouteProvider.setHtml5Mode(false);
     });
 
     inject(function($rootScope, $compile, $window, $location) {
-      let element = $compile('<a route-href="hashUrlWriter()">Link</a>')($rootScope.$new());
+      let element = $compile('<a route-href="pathUrlWriter()">Link</a>')($rootScope.$new());
       $rootScope.$digest();
 
       $window.location.origin = 'http://localhost';

@@ -10,15 +10,11 @@ function routeHrefFactory (Route, $window, $location, $timeout) {
         event.preventDefault();
         let urlPath = iElement.attr('href');
 
-        //TODO: investigate hash should be in HTML markup urls? (this leading to double hash ##)
-        if (!Route.isHtml5ModeEnabled()) {
-          urlPath = urlPath.replace(/^#/, '');
-        }
-
         if (event.metaKey) {
           const fullUrl = $window.location.origin + '/' + urlPath;
           $window.open(fullUrl,'_blank')
         } else {
+          urlPath = urlPath.replace(/^#/, '');
           return $timeout(() => $location.url(urlPath));
         }
       });
