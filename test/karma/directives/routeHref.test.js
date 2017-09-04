@@ -44,46 +44,43 @@ describe('routeHref directive', function() {
     });
   });
 
-  it('should prevent the default action by default and navigate using $location so as to use pushstate', function() {
+  it('should not prevent the default action by default if html5mode is false', function() {
     window.angular.mock.module(function(RouteProvider) {
       RouteProvider.registerUrlWriter('pagination', function(UrlData, State) {
         RouteProvider.setPersistentStates('page');
+        RouteProvider.setHtml5Mode(false);
         let page = State.get('page');
         return `/page/${page}`;
       });
     });
 
-    inject(function($rootScope, $compile, $location, State, $timeout) {
+    inject(function($rootScope, $compile, State, $timeout) {
       State.set('page', 2);
       let scope = $rootScope.$new();
       let element = $compile('<a route-href="paginationUrlWriter()">Link</a>')(scope);
       $rootScope.$digest();
       expect(element.attr('href'), 'href value').toBe('#/page/2');
 
-      spyOn($location, 'url');
-
       let event = undefined;
 
       element.click(e => event = e);
       element.click();
 
-      $timeout.flush();
+      $timeout.verifyNoPendingTasks();
 
-      expect($location.url, '$location.url should be called').toHaveBeenCalled();
-      expect(event.isDefaultPrevented(), 'should prevent event default').toBe(true);
+      expect(event.isDefaultPrevented(), 'should not prevent event default').toBe(false);
     });
   });
 
   it('should ignore the route href when the ignore-href attribute is added to the anchor element', function() {
     window.angular.mock.module(function(RouteProvider) {
-      RouteProvider.registerUrlWriter('hash', () => '#test');
-      RouteProvider.setHtml5Mode(true);
+      RouteProvider.registerUrlWriter('path', () => 'test');
+      RouteProvider.setHtml5Mode(false);
     });
 
     inject(function($rootScope, $compile, $location, $timeout) {
-      let element = $compile('<a route-href="hashUrlWriter()" ignore-href>Link</a>')($rootScope.$new());
+      let element = $compile('<a route-href="pathUrlWriter()" ignore-href>Link</a>')($rootScope.$new());
       $rootScope.$digest();
-      expect(element.attr('href'), 'href value').toBe('#test');
 
       spyOn($location, 'url');
 
@@ -94,7 +91,7 @@ describe('routeHref directive', function() {
 
       $timeout.verifyNoPendingTasks();
 
-      expect($location.url, '$location.url should be called').not.toHaveBeenCalled();
+      expect($location.url, '$location.url should not be called').not.toHaveBeenCalled();
       expect(event.isDefaultPrevented(), 'should not prevent event default').toBe(false);
     });
   });
