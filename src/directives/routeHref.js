@@ -1,41 +1,34 @@
-function routeHrefFactory (Route, $window, $location, $timeout) {
+function routeHrefFactory (Route, $location, $timeout) {
   'ngInject'
 
   return {
     restrict: 'A',
     scope: true,
     link (scope, iElement, iAttrs) {
-    if (iAttrs.ignoreHref === undefined) {
-      iElement.click((event) => {
-        event.preventDefault();
-        let urlPath = iElement.attr('href');
+      if (iAttrs.ignoreHref === undefined && Route.isHtml5ModeEnabled()) {
+        iElement.click((event) => {
+            event.preventDefault();
+            const urlPath = iElement.attr('href').replace(/^#/, '');
+            return $timeout(() => $location.url(urlPath));
+        });
+      }
 
-        if (event.metaKey) {
-          const fullUrl = $window.location.origin + '/' + urlPath;
-          $window.open(fullUrl,'_blank')
+      const object = Route.getUrlWriters();
+      for (const writerName in object) {
+        const writer = object[writerName];
+        scope[`${writerName}UrlWriter`] = writer;
+      }
+
+      return scope.$watch(iAttrs.routeHref, (newUrl) => {
+        let url;
+        if (Route.isHtml5ModeEnabled()) {
+          url = newUrl;
         } else {
-          urlPath = urlPath.replace(/^#/, '');
-          return $timeout(() => $location.url(urlPath));
+          url = `#${newUrl}`;
         }
+        return iElement.attr('href', url);
       });
     }
-
-    const object = Route.getUrlWriters();
-    for (const writerName in object) {
-      const writer = object[writerName];
-      scope[`${writerName}UrlWriter`] = writer;
-    }
-
-    return scope.$watch(iAttrs.routeHref, (newUrl) => {
-      let url;
-      if (Route.isHtml5ModeEnabled()) {
-        url = newUrl;
-      } else {
-        url = `#${newUrl}`;
-      }
-      return iElement.attr('href', url);
-    });
-  }
   }
 }
 
