@@ -87,7 +87,7 @@ angular.module('bicker_router').provider('Route', function(ObjectHelper) {
       return str.replace(/[\-\[\]\/\(\)\*\+\?\\\^\$\|]/g, "\\$&");
     },
 
-    $get($location, $injector, $q) {
+    $get($location, $injector, $q, $rootScope) {
       'ngInject';
 
       // When getting a new instance of the service (only done once), we need to iterate over the urlWriters and turn
@@ -197,8 +197,21 @@ angular.module('bicker_router').provider('Route', function(ObjectHelper) {
           return urlWriters[name](data);
         },
 
-        go(name, data = {}) {
-          return $location.url(this.invokeUrlWriter(name, data));
+        go(name, data = {}, forceReload = false) {
+          const currentUrl = $location.url();
+          const newUrl = this.invokeUrlWriter(name, data);
+
+          if (currentUrl !== newUrl) {
+            return $location.url(newUrl);
+          }
+
+          if (forceReload) {
+            this.reload();
+          }
+        },
+
+        reload() {
+          $rootScope.$emit('bicker_router.forcedReload');
         },
 
         getPersistentStates() {
