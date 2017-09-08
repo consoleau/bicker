@@ -447,6 +447,41 @@ describe('View directive', function() {
     });
   });
 
+  it('should reload the view when the bicker_router.forcedReload event is received', function() {
+    const stateAController = jasmine.createSpy('stateAController');
+
+    const viewAstateVariationA = {
+      name: 'viewAstateVariationA',
+      controller: 'StateVariationActrl',
+      templateUrl: 'stateVariationA.html',
+      requiredState: ['stateFieldA']
+    };
+
+    window.angular.mock.module(function(RouteProvider, ViewBindingsProvider, $controllerProvider) {
+      RouteProvider.registerUrl('/fake_initial_url');
+      $controllerProvider.register('StateVariationActrl', ['$scope', stateAController]);
+      RouteProvider.setPersistentStates('stateFieldA');
+      ViewBindingsProvider.bind('viewA', [viewAstateVariationA]);
+    });
+
+    mockTemplateRequest('stateVariationA.html', '<div id="contentsA"></div>');
+    mockLocationSuccess();
+
+    inject(function(State, $rootScope, $timeout) {
+      State.set('stateFieldA', 'some value');
+
+      createView('viewA');
+      triggerOpeningAnimationCompleteCallbacks();
+      deliverMainTemplate();
+
+      expect(stateAController, 'before: stateAController should be called').toHaveBeenCalled();
+      stateAController.calls.reset();
+      $rootScope.$emit('bicker_router.forcedReload')
+      $timeout.flush()
+      expect(stateAController, 'after: view should be reloaded').toHaveBeenCalled();
+    });
+  });
+
   it('caches the template so that it is not requested more than once', function() {
     const controller = jasmine.createSpy();
 

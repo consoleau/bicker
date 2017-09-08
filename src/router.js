@@ -11,6 +11,7 @@ angular.module('bicker_router', ['ngAnimate']).run(function (State, Route, $loca
   $rootScope.$on('$locationChangeSuccess', function (e, newUrl) {
     // Work-around for AngularJS issue https://github.com/angular/angular.js/issues/8368
     let data;
+
     if (newUrl === oldUrl) {
       return;
     }

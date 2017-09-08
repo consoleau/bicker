@@ -14,6 +14,7 @@ function routeViewFactory($log, $compile, $controller, ViewBindings, $q, State, 
       let viewManagementPending = false;
       const view = ViewBindings.getView(iAttrs.name);
       const bindings = view.getBindings();
+      let reloading = false
 
       iElement.addClass('ng-hide');
 
@@ -77,13 +78,16 @@ function routeViewFactory($log, $compile, $controller, ViewBindings, $q, State, 
             previousBinding = undefined;
             Route.deleteCurrentBinding(view.name)
           }
-          return;
+          return $q.resolve();
         }
 
         const newState = getStateDataForBinding(matchingBinding);
-        if ((matchingBinding === previousBinding) && angular.equals(previousBoundState, newState)) {
-          return;
+
+        if (!reloading && (matchingBinding === previousBinding) && angular.equals(previousBoundState, newState)) {
+          return $q.resolve();
         }
+
+        console.log('reloading state = ', reloading)
 
         previousBinding = matchingBinding;
         previousBoundState = newState;
@@ -332,24 +336,35 @@ function routeViewFactory($log, $compile, $controller, ViewBindings, $q, State, 
           return;
         }
 
-        const stateWatcher = function (changedPath, newValue, oldValue) {
+        const reload = function () {
           if (viewManagementPending) {
             return;
           }
+
           viewManagementPending = true;
 
           // Wrapped in a timeout so that we can finish the digest cycle before building the view, which should
           // prevent us from re-rendering a view multiple times if multiple properties of the same state dependency
           // get changed with repeated State.set calls
           return $timeout(function () {
-            manageView(iElement, bindings);
-            return viewManagementPending = false;
+            manageView(iElement, bindings).finally(() => {
+              reloading = false;
+              viewManagementPending = false;
+            });
           });
         };
 
-        State.watch(fields, stateWatcher);
+        State.watch(fields, reload);
 
-        viewDirectiveScope.$on('$destroy', () => State.removeWatcher(stateWatcher));
+        const deregisterForcedReloadListener = $rootScope.$on('bicker_router.forcedReload', function() {
+          reloading = true;
+          reload();
+        })
+
+        viewDirectiveScope.$on('$destroy', () => {
+          State.removeWatcher(reload);
+          deregisterForcedReloadListener();
+        });
       });
     }
   }

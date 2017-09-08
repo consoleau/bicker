@@ -481,18 +481,64 @@ describe('Route', function() {
   });
 
   describe('go', function() {
-    it("should call the specified url writer and update the browser's URL to the value returned", function () {
-      window.angular.mock.module(function (RouteProvider) {
-        RouteProvider.registerUrlWriter('pagination', UrlData => `/page/${UrlData.page}`);
-      });
+    describe('When the target URL is different to the current URL', function () {
+      it("should call the specified url writer and update the browser's URL to the value returned", function () {
+        window.angular.mock.module(function (RouteProvider) {
+          RouteProvider.registerUrlWriter('pagination', UrlData => `/page/${UrlData.page}`);
+        });
 
-      inject(function (Route, $location) {
-        spyOn($location, 'url');
-        Route.go('pagination', {page: 3});
-        expect($location.url).toHaveBeenCalledWith('/page/3');
+        inject(function (Route, $location) {
+          spyOn($location, 'url').and.returnValue('/some/other/url')
+          Route.go('pagination', {page: 3});
+          expect($location.url).toHaveBeenCalledWith('/page/3');
+        });
+      });
+    });
+
+    describe('When the target URL is the same as the current URL and forceReload is set to true', function () {
+      it("should force the view to re-render", function () {
+        window.angular.mock.module(function (RouteProvider) {
+          RouteProvider.registerUrlWriter('pagination', UrlData => '/some/url');
+        });
+
+        inject(function (Route, $location) {
+          const forceReload = true
+          spyOn($location, 'url').and.returnValue('/some/url')
+          spyOn(Route, 'reload')
+          Route.go('pagination', {}, forceReload);
+          expect(Route.reload).toHaveBeenCalled();
+          expect($location.url).not.toHaveBeenCalledWith('/some/url');
+        });
+      });
+    });
+
+    describe('When the target URL is the same as the current URL and forceReload is set to false', function () {
+      it("should force the view to re-render", function () {
+        window.angular.mock.module(function (RouteProvider) {
+          RouteProvider.registerUrlWriter('pagination', UrlData => '/some/url');
+        });
+
+        inject(function (Route, $location) {
+          const forceReload = false
+          spyOn($location, 'url').and.returnValue('/some/url')
+          spyOn(Route, 'reload')
+          Route.go('pagination', {}, forceReload);
+          expect(Route.reload).not.toHaveBeenCalled();
+          expect($location.url).not.toHaveBeenCalledWith('/some/url');
+        });
       });
     });
   });
+
+  describe('Reload', function() {
+    it('emits the event bicker_router.forcedReload', function () {
+      inject(function (Route, $rootScope) {
+        spyOn($rootScope, '$emit')
+        Route.reload()
+        expect($rootScope.$emit).toHaveBeenCalledWith('bicker_router.forcedReload')
+      });
+    })
+  })
 
   describe('persistentStates',  function() {
     it('set/get should work as expected', function() {
