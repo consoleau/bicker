@@ -58,7 +58,7 @@ module.exports = function (config) {
 
     browsers: ['Chrome'],
 
-    reporters: ['spec'],
+    // reporters: ['spec'],
 
     // Continuous Integration mode
     // if true, it capture browsers, run tests and exit

@@ -9,7 +9,7 @@ function routeOnClickFactory (Route, $location, $window, $timeout) {
       const LEFT_BUTTON = 0;
       const MIDDLE_BUTTON = 1;
 
-      if (element.tagName === 'A') {
+      if (element.tagName === 'A' || element[0].tagName === 'A') {
         addWatchThatUpdatesHrefAttribute();
 
       } else {
@@ -62,7 +62,9 @@ function routeOnClickFactory (Route, $location, $window, $timeout) {
       }
 
       function addWatchThatUpdatesHrefAttribute() {
-        return scope.$watch(iAttrs.routeOnClick, () => {
+        console.log('addWatchThatUpdatesHrefAttribute...')
+        return scope.$watch(attrs.routeOnClick, () => {
+          console.log('scope.$watch(attrs.routeOnClick... ', getUrl())
           return element.attr('href', getUrl());
         });
       }

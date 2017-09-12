@@ -22,13 +22,50 @@ describe('routeOnClick directive', function() {
       });
     });
   });
+
+  fdescribe('when element is an Anchor tag', function() {
+    it('should populate the href attribute of the element with the URL returned from the matching URL writer', function () {
+      setupMockUrlWriter();
+      inject(function ($rootScope, $compile) {
+        let element = $compile('<a route-on-click="routeLinkUrlWriter()">Link</a>')($rootScope.$new());
+        $rootScope.$digest();
+        expect(element.attr('href')).toBe('#/contacts/update/1');
+      });
+    });
+
+    it('should update the href attribute when the expression eval changes', function () {
+      window.angular.mock.module(function(RouteProvider) {
+        RouteProvider.setPersistentStates('page');
+        RouteProvider.setHtml5Mode(false);
+        RouteProvider.registerUrlWriter('pagination', function(UrlData, State) {
+          let page = State.get('page');
+          return `/page/${page}`;
+        });
+      });
+
+      inject(function ($rootScope, $compile, State) {
+        State.set('page', 2);
+        let element = $compile('<a route-on-click="paginationUrlWriter()">Link</a>')($rootScope.$new());
+        $rootScope.$digest();
+        expect(element.attr('href')).toBe('#/page/2');
+
+        State.set('page', 3);
+        $rootScope.$digest();
+        expect(element.attr('href')).toBe('#/page/3');
+      });
+    });
+  });
 });
 
-const assertNewWindow = function(eventTriggers, newWindowExpected) {
-  window.angular.mock.module(function(RouteProvider) {
+const setupMockUrlWriter = function() {
+  window.angular.mock.module(function (RouteProvider) {
     RouteProvider.registerUrlWriter('routeLink', () => '/contacts/update/1');
     RouteProvider.setHtml5Mode(false);
   });
+};
+
+const assertNewWindow = function(eventTriggers, newWindowExpected) {
+  setupMockUrlWriter();
 
   inject(function($rootScope, $compile, $window, $location, $timeout) {
     let element = $compile('<div route-on-click="routeLinkUrlWriter()">Link</div>')($rootScope.$new());
