@@ -3,13 +3,12 @@ function routeOnClickFactory (Route, $location, $window, $timeout) {
 
   return {
     restrict: 'A',
-    scope: true,
 
     link (scope, element, attrs) {
       const LEFT_BUTTON = 0;
       const MIDDLE_BUTTON = 1;
 
-      if (element.tagName === 'A') {
+      if (element.is('a')) {
         addWatchThatUpdatesHrefAttribute();
 
       } else {
@@ -50,20 +49,22 @@ function routeOnClickFactory (Route, $location, $window, $timeout) {
 
         for (const writerName in urlWriters) {
           locals[`${writerName}UrlWriter`] = urlWriters[writerName];
-        }
+      }
 
         let url = scope.$eval(attrs.routeOnClick, _.assign(locals, scope));
 
-        if (!Route.isHtml5ModeEnabled()) {
-          url = `#${url}`;
-        }
+        return html5TheUrl(url);
+      }
 
-        return url;
+      function html5TheUrl(url) {
+        return Route.isHtml5ModeEnabled() ? url : `#${url}`;
       }
 
       function addWatchThatUpdatesHrefAttribute() {
-        return scope.$watch(iAttrs.routeOnClick, () => {
-          return element.attr('href', getUrl());
+        scope.$watch(function () {
+          return `${getUrl()}`
+        }, (newUrl) => {
+          element.attr('href', newUrl);
         });
       }
     }
