@@ -25,7 +25,11 @@ describe('routeOnClick directive', function() {
 
   describe('when element is an Anchor tag', function() {
     it('should populate the href attribute of the element with the URL returned from the matching URL writer', function () {
-      setupMockUrlWriter();
+      window.angular.mock.module(function (RouteProvider) {
+        RouteProvider.registerUrlWriter('routeLink', () => '/contacts/update/1');
+        RouteProvider.setHtml5Mode(false);
+      });
+
       inject(function ($rootScope, $compile) {
         let element = $compile('<a route-on-click="routeLinkUrlWriter()">Link</a>')($rootScope.$new());
         $rootScope.$digest();
@@ -33,40 +37,56 @@ describe('routeOnClick directive', function() {
       });
     });
 
-    it('should update the href attribute when the expression eval changes', function () {
+    it('should update the href attribute when the expression eval changes', function() {
       window.angular.mock.module(function(RouteProvider) {
         RouteProvider.setPersistentStates('page');
         RouteProvider.setHtml5Mode(false);
-        RouteProvider.registerUrlWriter('pagination', function() {
-          return '/page/2';
+        RouteProvider.registerUrlWriter('pagination', function(UrlData, State) {
+          let page = State.get('page');
+          return `/page/${page}`;
         });
       });
 
-      inject(function ($rootScope, $compile, State) {
+      inject(function($rootScope, $location, Route, $compile, State) {
         State.set('page', 2);
         let element = $compile('<a route-on-click="paginationUrlWriter()">Link</a>')($rootScope.$new());
         $rootScope.$digest();
-        expect(element.attr('href')).toBe('#/page/2');
+        expect(element.attr('href'), 'href before eval update').toBe('#/page/2');
 
-        $rootScope.paginationUrlWriter = function() {
-          return '/page/3';
-        };
-        $rootScope.$apply();
-        expect(element.attr('href')).toBe('#/page/3');
+        State.set('page', 3);
+        $rootScope.$digest();
+        expect(element.attr('href'), 'href after eval update').toBe('#/page/3');
+      });
+    });
+  });
+
+  describe('html5Mode', function() {
+    it('should omit the # prefix when in html 5 mode', function() {
+      window.angular.mock.module(function(RouteProvider) {
+        RouteProvider.setPersistentStates('page');
+        RouteProvider.setHtml5Mode(true);
+        RouteProvider.registerUrlWriter('pagination', function(UrlData, State) {
+          let page = State.get('page');
+          return `/page/${page}`;
+        });
+      });
+
+      inject(function($rootScope, $location, Route, $compile, State) {
+        State.set('page', 2);
+        let element = $compile('<a route-on-click="paginationUrlWriter()">Link</a>')($rootScope.$new());
+        $rootScope.$digest();
+
+        expect(element.attr('href')).toBe('/page/2');
       });
     });
   });
 });
 
-const setupMockUrlWriter = function() {
+const assertNewWindow = function(eventTriggers, newWindowExpected) {
   window.angular.mock.module(function (RouteProvider) {
     RouteProvider.registerUrlWriter('routeLink', () => '/contacts/update/1');
     RouteProvider.setHtml5Mode(false);
   });
-};
-
-const assertNewWindow = function(eventTriggers, newWindowExpected) {
-  setupMockUrlWriter();
 
   inject(function($rootScope, $compile, $window, $location, $timeout) {
     let element = $compile('<div route-on-click="routeLinkUrlWriter()">Link</div>')($rootScope.$new());

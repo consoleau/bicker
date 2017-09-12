@@ -3,7 +3,6 @@ function routeOnClickFactory (Route, $location, $window, $timeout) {
 
   return {
     restrict: 'A',
-    scope: true,
 
     link (scope, element, attrs) {
       const LEFT_BUTTON = 0;
@@ -50,7 +49,7 @@ function routeOnClickFactory (Route, $location, $window, $timeout) {
 
         for (const writerName in urlWriters) {
           locals[`${writerName}UrlWriter`] = urlWriters[writerName];
-        }
+      }
 
         let url = scope.$eval(attrs.routeOnClick, _.assign(locals, scope));
 
@@ -62,14 +61,10 @@ function routeOnClickFactory (Route, $location, $window, $timeout) {
       }
 
       function addWatchThatUpdatesHrefAttribute() {
-        return scope.$watch(attrs.routeOnClick, (newUrl) => {
-          let url;
-          if (newUrl) {
-            url = html5TheUrl(newUrl);
-          } else {
-            url = getUrl();
-          }
-          return element.attr('href', url);
+        scope.$watch(function () {
+          return `${getUrl()}`
+        }, (newUrl) => {
+          element.attr('href', newUrl);
         });
       }
     }
