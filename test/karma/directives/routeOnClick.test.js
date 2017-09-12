@@ -23,7 +23,7 @@ describe('routeOnClick directive', function() {
     });
   });
 
-  fdescribe('when element is an Anchor tag', function() {
+  describe('when element is an Anchor tag', function() {
     it('should populate the href attribute of the element with the URL returned from the matching URL writer', function () {
       setupMockUrlWriter();
       inject(function ($rootScope, $compile) {
@@ -37,9 +37,8 @@ describe('routeOnClick directive', function() {
       window.angular.mock.module(function(RouteProvider) {
         RouteProvider.setPersistentStates('page');
         RouteProvider.setHtml5Mode(false);
-        RouteProvider.registerUrlWriter('pagination', function(UrlData, State) {
-          let page = State.get('page');
-          return `/page/${page}`;
+        RouteProvider.registerUrlWriter('pagination', function() {
+          return '/page/2';
         });
       });
 
@@ -49,8 +48,10 @@ describe('routeOnClick directive', function() {
         $rootScope.$digest();
         expect(element.attr('href')).toBe('#/page/2');
 
-        State.set('page', 3);
-        $rootScope.$digest();
+        $rootScope.paginationUrlWriter = function() {
+          return '/page/3';
+        };
+        $rootScope.$apply();
         expect(element.attr('href')).toBe('#/page/3');
       });
     });

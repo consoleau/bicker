@@ -54,18 +54,22 @@ function routeOnClickFactory (Route, $location, $window, $timeout) {
 
         let url = scope.$eval(attrs.routeOnClick, _.assign(locals, scope));
 
-        if (!Route.isHtml5ModeEnabled()) {
-          url = `#${url}`;
-        }
+        return html5TheUrl(url);
+      }
 
-        return url;
+      function html5TheUrl(url) {
+        return Route.isHtml5ModeEnabled() ? url : `#${url}`;
       }
 
       function addWatchThatUpdatesHrefAttribute() {
-        console.log('addWatchThatUpdatesHrefAttribute...')
-        return scope.$watch(attrs.routeOnClick, () => {
-          console.log('scope.$watch(attrs.routeOnClick... ', getUrl())
-          return element.attr('href', getUrl());
+        return scope.$watch(attrs.routeOnClick, (newUrl) => {
+          let url;
+          if (newUrl) {
+            url = html5TheUrl(newUrl);
+          } else {
+            url = getUrl();
+          }
+          return element.attr('href', url);
         });
       }
     }
