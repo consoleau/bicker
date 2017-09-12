@@ -8,7 +8,7 @@ function routeOnClickFactory (Route, $location, $window, $timeout) {
       const LEFT_BUTTON = 0;
       const MIDDLE_BUTTON = 1;
 
-      if (element.tagName === 'A' || element[0].tagName === 'A') {
+      if (element.is('a')) {
         addWatchThatUpdatesHrefAttribute();
 
       } else {
