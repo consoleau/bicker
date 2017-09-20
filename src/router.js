@@ -45,7 +45,7 @@ angular.module('bicker_router', ['ngAnimate']).run(function (State, Route, $loca
 
     setTimeout(function () {
       const routeChangeSuccessEventData = {'bindings': Route.getCurrentBindings()};
-      $rootScope.$broadcast('bicker_router.routeChangeSuccess', routeChangeSuccessEventData);
+      $rootScope.$emit('bicker_router.routeChangeSuccess', routeChangeSuccessEventData);
     }, 1)
   });
 });
