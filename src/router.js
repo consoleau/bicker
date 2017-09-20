@@ -9,12 +9,6 @@ angular.module('bicker_router', ['ngAnimate']).run(function (State, Route, $loca
   });
 
   $rootScope.$on('$locationChangeSuccess', function (e, newUrl) {
-
-    setTimeout(function() {
-      const eventData = {'viewName': Route.getCurrentViewName()};
-      $rootScope.$emit('bicker_router.$locationChangeSuccess', eventData);
-    }, 1)
-
     // Work-around for AngularJS issue https://github.com/angular/angular.js/issues/8368
     let data;
     if (newUrl === oldUrl) {
@@ -36,7 +30,6 @@ angular.module('bicker_router', ['ngAnimate']).run(function (State, Route, $loca
     fieldsToUnset = _.difference(fieldsToUnset, Route.getPersistentStates().concat(Route.getFlashStates()));
 
     const eventData = {unsetting: fieldsToUnset, setting: data};
-
     $rootScope.$emit('bicker_router.beforeStateChange', eventData);
 
     if ((eventData.unsetting).length !== 0) {
@@ -49,5 +42,10 @@ angular.module('bicker_router', ['ngAnimate']).run(function (State, Route, $loca
 
     Route.resetFlashStates();
     Route.setReady(true);
+
+    setTimeout(function () {
+      const routeChangeSuccessEventData = {'bindings': Route.getCurrentBindings()};
+      $rootScope.$broadcast('bicker_router.routeChangeSuccess', routeChangeSuccessEventData);
+    }, 1)
   });
 });

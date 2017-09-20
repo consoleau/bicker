@@ -172,4 +172,16 @@ describe('Router', function() {
       expect(State.set, 'State.set f,g').toHaveBeenCalledWith('f', 'g');
     });
   });
+
+  it('should emit the routeChangeSuccess event with bindings when the route changes', function() {
+    inject(function ($rootScope) {
+      let routeChangeSuccessCalled = false;
+      $rootScope.$on('bicker_router.routeChangeSuccess', (event, data) => {
+        routeChangeSuccessCalled = true;
+        expect(Object.keys(data)).toContain('bindings');
+      });
+      $rootScope.$broadcast('$locationChangeSuccess', 'fake_new_url');
+      expect(routeChangeSuccessCalled).toEqual(true);
+    });
+  });
 });
