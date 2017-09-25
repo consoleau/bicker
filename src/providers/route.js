@@ -221,10 +221,6 @@ angular.module('bicker_router').provider('Route', function(ObjectHelper) {
           this.currentBindings[viewName] = binding;
         },
 
-        getCurrentBindings() {
-          return this.currentBindings;
-        },
-
         getCurrentBinding(viewName) {
           return this.currentBindings[viewName];
         },

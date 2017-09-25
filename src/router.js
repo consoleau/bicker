@@ -42,10 +42,5 @@ angular.module('bicker_router', ['ngAnimate']).run(function (State, Route, $loca
 
     Route.resetFlashStates();
     Route.setReady(true);
-
-    setTimeout(function () {
-      const routeChangeSuccessEventData = {'bindings': Route.getCurrentBindings()};
-      $rootScope.$emit('bicker_router.routeChangeSuccess', routeChangeSuccessEventData);
-    }, 1)
   });
 });

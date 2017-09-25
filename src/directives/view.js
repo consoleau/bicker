@@ -85,6 +85,8 @@ function routeViewFactory($log, $compile, $controller, ViewBindings, $q, State, 
           return;
         }
 
+        $rootScope.$broadcast('bicker_router.viewChangeSuccess', matchingBinding);
+
         previousBinding = matchingBinding;
         previousBoundState = newState;
 
