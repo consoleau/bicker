@@ -879,14 +879,13 @@ describe('View directive', function() {
 
     inject(function ($rootScope) {
       let viewChangeSuccessCalled = false;
-      $rootScope.$on('bicker_router.viewChangeSuccess', (event, data) => {
+      $rootScope.$on('bicker_router.bindingChanged', (event, data) => {
         viewChangeSuccessCalled = true;
-        expect(Object.keys(data)).toContain('name');
+        expect(Object.keys(data)).toContain('viewName');
+        expect(Object.keys(data)).toContain('currentBinding');
       });
 
       createView('viewA');
-      triggerOpeningAnimationCompleteCallbacks();
-      deliverMainTemplate();
 
       expect(viewChangeSuccessCalled).toEqual(true);
     });
