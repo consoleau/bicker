@@ -868,6 +868,28 @@ describe('View directive', function() {
     });
   });
 
+  it('should emit the viewChangeSuccess event when the current view binding changes', function() {
+    window.angular.mock.module(function(RouteProvider, ViewBindingsProvider) {
+      RouteProvider.registerUrl('/fake_initial_url');
+      ViewBindingsProvider.bind('viewA', {templateUrl: 'viewA.html', name: 'view.list'});
+    });
+
+    mockTemplateRequest('viewA.html', 'view A template');
+    mockLocationSuccess();
+
+    inject(function ($rootScope) {
+      let viewChangeSuccessCalled = false;
+      $rootScope.$on('bicker_router.bindingChanged', (event, data) => {
+        viewChangeSuccessCalled = true;
+        expect(Object.keys(data)).toContain('viewName');
+        expect(Object.keys(data)).toContain('currentBinding');
+      });
+
+      createView('viewA');
+
+      expect(viewChangeSuccessCalled).toEqual(true);
+    });
+  });
 
   function mockTemplateRequest(path, template) {
     inject(function($httpBackend) {
