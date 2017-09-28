@@ -24,6 +24,7 @@ angular.module('bicker_router', ['ngAnimate']).run(function (State, Route, $loca
       data = {};
     } else {
       data = Route.extractData(match);
+      $rootScope.$emit('bicker_router.urlMatched', match);
     }
 
     let fieldsToUnset = ObjectHelper.notIn(State.list, data);

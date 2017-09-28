@@ -144,6 +144,36 @@ describe('Router', function() {
     });
   });
 
+  it('should emit the bicker_router.urlMatched event', function() {
+    let url = '/properties';
+
+    window.angular.mock.module(function(RouteProvider) {
+      RouteProvider.registerUrl(url);
+    });
+
+    inject(function(State, $location, $rootScope, Route) {
+      const routeMatch = {
+        regexMatch: ['/properties'],
+        url: {
+          compiledUrl: {
+            tokens: [],
+            regex: /\/properties/
+          },
+          pattern: '/properties'
+        }
+      }
+      spyOn($location, 'path').and.returnValue(url);
+      spyOn(Route, 'match').and.returnValue(routeMatch)
+      let handler = jasmine.createSpy('urlMatchedHandler');
+
+      $rootScope.$on('bicker_router.urlMatched', handler);
+      $rootScope.$broadcast('$locationChangeSuccess', url);
+      $rootScope.$digest();
+      expect(handler).toHaveBeenCalledWith(jasmine.any(Object), routeMatch);
+    });
+  });
+
+
   it('should allow event handlers to modify the data to set/unset', function() {
     let url = '/a/b/c';
 
