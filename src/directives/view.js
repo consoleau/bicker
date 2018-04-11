@@ -11,6 +11,7 @@ function routeViewFactory($log, $compile, $controller, ViewBindings, $q, State, 
     link (viewDirectiveScope, iElement, iAttrs) {
       let viewCreated = false;
       let viewScope = undefined;
+      let viewController = {}; // NB will only be defined for components
       let viewManagementPending = false;
       const view = ViewBindings.getView(iAttrs.name);
       const bindings = view.getBindings();
@@ -103,6 +104,7 @@ function routeViewFactory($log, $compile, $controller, ViewBindings, $q, State, 
             });
           } else {
             viewScope.$destroy();
+            if (viewController.$onDestroy) { viewController.$onDestroy() }
             return createView(element, matchingBinding, delayForRealTemplateInsertion);
           }
         });
@@ -125,6 +127,7 @@ function routeViewFactory($log, $compile, $controller, ViewBindings, $q, State, 
         viewCreated = false;
         element.children().eq(0).remove();
         viewScope.$destroy();
+        if (viewController.$onDestroy) { viewController.$onDestroy() }
       }
 
       function createView(element, binding, minimumDelay) {
@@ -230,6 +233,7 @@ function routeViewFactory($log, $compile, $controller, ViewBindings, $q, State, 
           element.html(template);
           const link = $compile(element.contents());
           viewScope = viewDirectiveScope.$new();
+          viewController = {}
           return link(viewScope);
         });
       }
@@ -257,12 +261,15 @@ function routeViewFactory($log, $compile, $controller, ViewBindings, $q, State, 
         element.html(template);
         const link = $compile(element.contents());
         viewScope = viewDirectiveScope.$new();
+        viewController = {}
 
         if (component.controller) {
           const locals = _.merge(dependencies, {$scope: viewScope, $element: element.children().eq(0)});
 
           try {
-            locals.$scope[component.controllerAs] = $controller(component.controller, locals);
+            viewController = $controller(component.controller, locals)
+            locals.$scope[component.controllerAs] = viewController;
+            if (viewController.$onInit) { viewController.$onInit() }
           }
           catch (error) {
             let errorMessage;
