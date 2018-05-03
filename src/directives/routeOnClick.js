@@ -1,5 +1,5 @@
 function routeOnClickFactory (Route, $location, $window, $timeout) {
-  'ngInject'
+  'ngInject';
 
   return {
     restrict: 'A',
@@ -49,9 +49,9 @@ function routeOnClickFactory (Route, $location, $window, $timeout) {
 
         for (const writerName in urlWriters) {
           locals[`${writerName}UrlWriter`] = urlWriters[writerName];
-      }
+        }
 
-        let url = scope.$eval(attrs.routeOnClick, _.assign(locals, scope));
+        const url = scope.$eval(attrs.routeOnClick, _.assign(locals, scope));
 
         return html5TheUrl(url);
       }
@@ -62,13 +62,13 @@ function routeOnClickFactory (Route, $location, $window, $timeout) {
 
       function addWatchThatUpdatesHrefAttribute() {
         scope.$watch(function () {
-          return `${getUrl()}`
+          return `${getUrl()}`;
         }, (newUrl) => {
           element.attr('href', newUrl);
         });
       }
     }
-  }
+  };
 }
 
 angular.module('bicker_router').directive('routeOnClick', routeOnClickFactory);

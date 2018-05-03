@@ -19,25 +19,23 @@
 //
 
 function routeClassFactory(Route) {
-  'ngInject'
+  'ngInject';
   return {
     restrict: 'A',
     link (scope, iElement, iAttrs) {
       scope.$watch(() => {
-        const routeClassDefinition = scope.$eval(iAttrs['routeClass'])
+        const routeClassDefinition = scope.$eval(iAttrs['routeClass']);
 
         if (!Route.matchesCurrentBindingName(routeClassDefinition.viewName, routeClassDefinition.bindingName)) {
           if (iElement.hasClass(routeClassDefinition.className)) {
-            iElement.removeClass(routeClassDefinition.className)
+            iElement.removeClass(routeClassDefinition.className);
           }
-        } else {
-          if (!iElement.hasClass(routeClassDefinition.className)) {
-            iElement.addClass(routeClassDefinition.className)
-          }
+        } else if (!iElement.hasClass(routeClassDefinition.className)) {
+          iElement.addClass(routeClassDefinition.className);
         }
-      })
+      });
     }
-  }
+  };
 }
 
 angular.module('bicker_router').directive('routeClass', routeClassFactory);

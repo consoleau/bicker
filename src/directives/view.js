@@ -76,7 +76,7 @@ function routeViewFactory($log, $compile, $controller, ViewBindings, $q, State, 
             });
             previousBoundState = undefined;
             previousBinding = undefined;
-            Route.deleteCurrentBinding(view.name)
+            Route.deleteCurrentBinding(view.name);
           }
           return;
         }
@@ -104,7 +104,7 @@ function routeViewFactory($log, $compile, $controller, ViewBindings, $q, State, 
             });
           } else {
             viewScope.$destroy();
-            if (viewController.$onDestroy) { viewController.$onDestroy() }
+            if (viewController.$onDestroy) { viewController.$onDestroy(); }
             return createView(element, matchingBinding, delayForRealTemplateInsertion);
           }
         });
@@ -127,7 +127,7 @@ function routeViewFactory($log, $compile, $controller, ViewBindings, $q, State, 
         viewCreated = false;
         element.children().eq(0).remove();
         viewScope.$destroy();
-        if (viewController.$onDestroy) { viewController.$onDestroy() }
+        if (viewController.$onDestroy) { viewController.$onDestroy(); }
       }
 
       function createView(element, binding, minimumDelay) {
@@ -179,7 +179,7 @@ function routeViewFactory($log, $compile, $controller, ViewBindings, $q, State, 
           return showResolvingError(error, element, binding);
         };
 
-        Route.setCurrentBinding(view.name, binding)
+        Route.setCurrentBinding(view.name, binding);
         const promises = {template: $templateRequest(component.templateUrl), dependencies: resolve(binding)};
         return $q.all(promises).then(onSuccessfulResolution, onResolutionFailure);
       }
@@ -233,7 +233,7 @@ function routeViewFactory($log, $compile, $controller, ViewBindings, $q, State, 
           element.html(template);
           const link = $compile(element.contents());
           viewScope = viewDirectiveScope.$new();
-          viewController = {}
+          viewController = {};
           return link(viewScope);
         });
       }
@@ -261,17 +261,16 @@ function routeViewFactory($log, $compile, $controller, ViewBindings, $q, State, 
         element.html(template);
         const link = $compile(element.contents());
         viewScope = viewDirectiveScope.$new();
-        viewController = {}
+        viewController = {};
 
         if (component.controller) {
           const locals = _.merge(dependencies, {$scope: viewScope, $element: element.children().eq(0)});
 
           try {
-            viewController = $controller(component.controller, locals)
+            viewController = $controller(component.controller, locals);
             locals.$scope[component.controllerAs] = viewController;
-            if (viewController.$onInit) { viewController.$onInit() }
-          }
-          catch (error) {
+            if (viewController.$onInit) { viewController.$onInit(); }
+          }          catch (error) {
             let errorMessage;
 
             try {
@@ -362,7 +361,7 @@ function routeViewFactory($log, $compile, $controller, ViewBindings, $q, State, 
         viewDirectiveScope.$on('$destroy', () => State.removeWatcher(stateWatcher));
       });
     }
-  }
+  };
 }
 
 angular.module('bicker_router').directive('view', routeViewFactory);

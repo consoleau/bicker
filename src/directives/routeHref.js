@@ -1,5 +1,5 @@
 function routeHrefFactory (Route, $location, $timeout) {
-  'ngInject'
+  'ngInject';
 
   return {
     restrict: 'A',
@@ -7,9 +7,9 @@ function routeHrefFactory (Route, $location, $timeout) {
     link (scope, iElement, iAttrs) {
       if (iAttrs.ignoreHref === undefined && Route.isHtml5ModeEnabled()) {
         iElement.click((event) => {
-            event.preventDefault();
-            const urlPath = iElement.attr('href').replace(/^#/, '');
-            return $timeout(() => $location.url(urlPath));
+          event.preventDefault();
+          const urlPath = iElement.attr('href').replace(/^#/, '');
+          return $timeout(() => $location.url(urlPath));
         });
       }
 
@@ -29,7 +29,7 @@ function routeHrefFactory (Route, $location, $timeout) {
         return iElement.attr('href', url);
       });
     }
-  }
+  };
 }
 
 angular.module('bicker_router').directive('routeHref', routeHrefFactory);

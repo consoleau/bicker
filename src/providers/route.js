@@ -230,10 +230,10 @@ angular.module('bicker_router').provider('Route', function(ObjectHelper) {
         },
 
         matchesCurrentBindingName(viewName, bindingNameExpression) {
-          const currentBinding = this.getCurrentBinding(viewName)
+          const currentBinding = this.getCurrentBinding(viewName);
 
           if (!currentBinding) {
-            return false
+            return false;
           }
 
           return bindingNameExpression instanceof RegExp ?
