@@ -118,6 +118,7 @@ describe('ViewBindings', function() {
 
   describe('Application of basic common fields', function() {
     let basicCommonFields = [
+      { name: 'commonResolvingTemplateUrl', overrideField: 'resolvingTemplateUrl' },
       { name: 'commonResolvingErrorTemplateUrl', overrideField: 'resolvingErrorTemplateUrl' },
       { name: 'commonResolvingErrorComponent', overrideField: 'resolvingErrorComponent' },
       { name: 'commonErrorComponent', overrideField: 'errorComponent' },
