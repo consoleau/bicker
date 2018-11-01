@@ -38,7 +38,7 @@ angular.module('bicker_router').provider('Route', function(ObjectHelper) {
 
     setPersistentStates(...stateList) {
       _.forEach(stateList, (state) => {
-        if (!persistentStates.includes(state)) {
+        if (!_.includes(persistentStates, state)) {
           persistentStates.push(state);
         }
       });
