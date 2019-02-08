@@ -211,10 +211,10 @@ function routeViewFactory($log, $compile, $controller, ViewBindings, $q, State, 
       }
 
       function showResolvingError(error, element, binding) {
-        if (error === PermissionDeniedError && binding.resolvingPermissionDeniedTemplateUrl) {
-          return showBasicTemplate(element, binding, 'resolvingPermissionDeniedTemplateUrl');
-        } else if (error === PermissionDeniedError && binding.resolvingPermissionDeniedComponent) {
-          return showErrorComponent(error, element, binding, 'resolvingPermissionDeniedComponent');
+        if (error === PermissionDeniedError && binding.permissionDeniedTemplateUrl) {
+          return showBasicTemplate(element, binding, 'permissionDeniedTemplateUrl');
+        } else if (error === PermissionDeniedError && binding.permissionDeniedComponent) {
+          return showErrorComponent(error, element, binding, 'permissionDeniedComponent');
         } else if (binding.resolvingErrorTemplateUrl) {
           return showBasicTemplate(element, binding, 'resolvingErrorTemplateUrl');
         } else if (binding.resolvingErrorComponent) {
