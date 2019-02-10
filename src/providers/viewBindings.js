@@ -43,6 +43,8 @@ angular.module('bicker_router').provider('ViewBindings', function () {
 
       function applyCommonFields(newBindings) {
         const basicCommonFields = [
+          {name: 'commonPermissionDeniedTemplateUrl', overrideField: 'permissionDeniedTemplateUrl'},
+          {name: 'commonPermissionDeniedComponent', overrideField: 'permissionDeniedComponent'},
           {name: 'commonResolvingTemplateUrl', overrideField: 'resolvingTemplateUrl'},
           {name: 'commonResolvingErrorTemplateUrl', overrideField: 'resolvingErrorTemplateUrl'},
           {name: 'commonResolvingErrorComponent', overrideField: 'resolvingErrorComponent'},

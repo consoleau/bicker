@@ -1,7 +1,7 @@
 // @TODO none of the animation code in this directive has been tested. Not sure if it can be at this stage This needs further investigation.
 // @TODO this code does too much, it should be refactored.
 
-function routeViewFactory($log, $compile, $controller, ViewBindings, $q, State, $rootScope, $animate, $timeout, $injector, PendingViewCounter, $templateRequest, Route) {
+function routeViewFactory($log, $compile, $controller, ViewBindings, $q, State, $rootScope, $animate, $timeout, $injector, PendingViewCounter, PermissionDeniedError, $templateRequest, Route) {
   'ngInject';
   return {
     restrict: 'E',
@@ -134,6 +134,16 @@ function routeViewFactory($log, $compile, $controller, ViewBindings, $q, State, 
         const timeStartedMainView = Date.now();
         const component = getComponentFromBinding(binding);
 
+        const resolveIsPermitted = function (binding) {
+          if (binding.isPermitted) {
+            return $injector.invoke(binding.isPermitted)
+              ? $q.resolve(true)
+              : $q.reject(PermissionDeniedError);
+          }
+
+          return $q.resolve(true);
+        };
+
         const onSuccessfulResolution = function (args) {
           if (getMatchingBinding(bindings) !== binding) {
             return;
@@ -162,8 +172,7 @@ function routeViewFactory($log, $compile, $controller, ViewBindings, $q, State, 
           const mainTemplateInjectionDelay = Math.max(0, minimumDelay - resolvingTemplateShownTime);
 
           if (resolvingTemplateShownTime < minimumDelay) {
-            return $timeout(() => injectMainTemplate()
-              , mainTemplateInjectionDelay);
+            return $timeout(() => injectMainTemplate(), mainTemplateInjectionDelay);
           } else {
             return injectMainTemplate();
           }
@@ -180,7 +189,11 @@ function routeViewFactory($log, $compile, $controller, ViewBindings, $q, State, 
         };
 
         Route.setCurrentBinding(view.name, binding);
-        const promises = {template: $templateRequest(component.templateUrl), dependencies: resolve(binding)};
+        const promises = {
+          template: $templateRequest(component.templateUrl),
+          dependencies: resolve(binding),
+          isPermitted: resolveIsPermitted(binding)
+        };
         return $q.all(promises).then(onSuccessfulResolution, onResolutionFailure);
       }
 
@@ -198,14 +211,16 @@ function routeViewFactory($log, $compile, $controller, ViewBindings, $q, State, 
       }
 
       function showResolvingError(error, element, binding) {
-        if (binding.resolvingErrorTemplateUrl) {
-          return showResolvingErrorTemplate(element, binding);
+        if (error === PermissionDeniedError && binding.permissionDeniedTemplateUrl) {
+          return showBasicTemplate(element, binding, 'permissionDeniedTemplateUrl');
+        } else if (error === PermissionDeniedError && binding.permissionDeniedComponent) {
+          return showErrorComponent(error, element, binding, 'permissionDeniedComponent');
+        } else if (binding.resolvingErrorTemplateUrl) {
+          return showBasicTemplate(element, binding, 'resolvingErrorTemplateUrl');
         } else if (binding.resolvingErrorComponent) {
           return showErrorComponent(error, element, binding, 'resolvingErrorComponent');
         }
       }
-
-      const showResolvingErrorTemplate = (element, binding) => showBasicTemplate(element, binding, 'resolvingErrorTemplateUrl');
 
       function showError(error, element, binding) {
         let returnValue = null;
