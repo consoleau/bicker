@@ -8,13 +8,16 @@ function routeViewFactory($log, $compile, $controller, ViewBindings, $q, State, 
     scope: false,
     replace: true,
     template: '<div></div>',
-    link (viewDirectiveScope, iElement, iAttrs) {
+    controller () {},
+    link (viewDirectiveScope, iElement, iAttrs, ctrl) {
       let viewCreated = false;
       let viewScope = undefined;
       let viewController = {}; // NB will only be defined for components
       let viewManagementPending = false;
       const view = ViewBindings.getView(iAttrs.name);
       const bindings = view.getBindings();
+
+      ctrl.viewName = iAttrs.name
 
       iElement.addClass('ng-hide');
 
