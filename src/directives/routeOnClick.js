@@ -57,7 +57,8 @@ function routeOnClickFactory (Route, $location, $window, $timeout) {
       }
 
       function html5TheUrl(url) {
-        return Route.isHtml5ModeEnabled() ? url : `#${url}`;
+        const isAbsoluteUrl = (/^(https?:){0,1}\/\/.+/).test(url);
+        return Route.isHtml5ModeEnabled() || isAbsoluteUrl ? url : `#${url}`;
       }
 
       function addWatchThatUpdatesHrefAttribute() {

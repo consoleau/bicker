@@ -37,6 +37,32 @@ describe('routeOnClick directive', function() {
       });
     });
 
+    it('should omit the # when it is an absolute link', function () {
+      window.angular.mock.module(function (RouteProvider) {
+        RouteProvider.registerUrlWriter('routeLink', () => 'https://www.google.com/');
+        RouteProvider.setHtml5Mode(false);
+      });
+
+      inject(function ($rootScope, $compile) {
+        let element = $compile('<a route-on-click="routeLinkUrlWriter()">Link</a>')($rootScope.$new());
+        $rootScope.$digest();
+        expect(element.attr('href')).toBe('https://www.google.com/');
+      });
+    })
+
+    it('should not omit the # when there is a http in relative URL', function () {
+      window.angular.mock.module(function (RouteProvider) {
+        RouteProvider.registerUrlWriter('routeLink', () => '/http-interceptor');
+        RouteProvider.setHtml5Mode(false);
+      });
+
+      inject(function ($rootScope, $compile) {
+        let element = $compile('<a route-on-click="routeLinkUrlWriter()">Link</a>')($rootScope.$new());
+        $rootScope.$digest();
+        expect(element.attr('href')).toBe('#/http-interceptor');
+      });
+    })
+
     it('should update the href attribute when the expression eval changes', function() {
       window.angular.mock.module(function(RouteProvider) {
         RouteProvider.setPersistentStates('page');
