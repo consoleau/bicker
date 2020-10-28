@@ -87,7 +87,7 @@ angular.module('bicker_router').provider('Route', function(ObjectHelper) {
       return str.replace(/[\-\[\]\/\(\)\*\+\?\\\^\$\|]/g, "\\$&");
     },
 
-    $get($location, $injector, $q) {
+    $get($location, $injector, $q, $window) {
       'ngInject';
 
       // When getting a new instance of the service (only done once), we need to iterate over the urlWriters and turn
@@ -198,7 +198,11 @@ angular.module('bicker_router').provider('Route', function(ObjectHelper) {
         },
 
         go(name, data = {}) {
-          return $location.url(this.invokeUrlWriter(name, data));
+          const url = this.invokeUrlWriter(name, data)
+          const isAbsoluteUrl = (/^(https?:){0,1}\/\/.+/).test(url);
+          return (isAbsoluteUrl)
+            ? $window.location.href = url
+            : $location.url(url);
         },
 
         getPersistentStates() {
