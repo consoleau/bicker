@@ -44,7 +44,7 @@
     "karma-jasmine": "^0.3.6",
     "karma-ng-scenario": "^0.1.0",
     "karma-spec-reporter": "^0.0.31",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.21",
     "traverse": "^0.6.6"
   },
   "browserify": {
